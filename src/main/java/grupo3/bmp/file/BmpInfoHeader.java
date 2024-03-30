@@ -82,28 +82,28 @@ public class BmpInfoHeader {
     }
 
     public BmpInfoHeader(int width, int height) {
-        this.size = 40;
+        size = 40;
         this.width = width;
         this.height = height;
-        this.planes = 1;
-        this.bitCount = 24;
+        planes = 1;
+        bitCount = 24;
     }
 
     /**
      * Writes this header to an output stream.
      */
     public void writeTo(OutputStream stream) throws IOException {
-        StreamUtils.writeInt(stream, this.size);
-        StreamUtils.writeInt(stream, this.width);
-        StreamUtils.writeInt(stream, this.height);
-        StreamUtils.writeShort(stream, this.planes);
-        StreamUtils.writeShort(stream, this.bitCount);
-        StreamUtils.writeInt(stream, this.compression);
-        StreamUtils.writeInt(stream, this.sizeImage);
-        StreamUtils.writeInt(stream, this.pixelsPerMeterX);
-        StreamUtils.writeInt(stream, this.pixelsPerMeterY);
-        StreamUtils.writeInt(stream, this.colorUsed);
-        StreamUtils.writeInt(stream, this.colorImportant);
+        StreamUtils.writeInt(stream, size);
+        StreamUtils.writeInt(stream, width);
+        StreamUtils.writeInt(stream, height);
+        StreamUtils.writeShort(stream, planes);
+        StreamUtils.writeShort(stream, bitCount);
+        StreamUtils.writeInt(stream, compression);
+        StreamUtils.writeInt(stream, sizeImage);
+        StreamUtils.writeInt(stream, pixelsPerMeterX);
+        StreamUtils.writeInt(stream, pixelsPerMeterY);
+        StreamUtils.writeInt(stream, colorUsed);
+        StreamUtils.writeInt(stream, colorImportant);
     }
 
     /**

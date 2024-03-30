@@ -46,7 +46,7 @@ public class BmpFileHeader {
     }
 
     public BmpFileHeader(int size, int offBits) {
-        this.type = 0x4D42;
+        type = 0x4D42;
         this.size = size;
         this.offBits = offBits;
     }
@@ -55,11 +55,11 @@ public class BmpFileHeader {
      * Writes this header to an output stream.
      */
     public void writeTo(OutputStream stream) throws IOException {
-        StreamUtils.writeShort(stream, this.type);
-        StreamUtils.writeInt(stream, this.size);
-        StreamUtils.writeShort(stream, this.reserved1);
-        StreamUtils.writeShort(stream, this.reserved2);
-        StreamUtils.writeInt(stream, this.offBits);
+        StreamUtils.writeShort(stream, type);
+        StreamUtils.writeInt(stream, size);
+        StreamUtils.writeShort(stream, reserved1);
+        StreamUtils.writeShort(stream, reserved2);
+        StreamUtils.writeInt(stream, offBits);
     }
 
     /**
