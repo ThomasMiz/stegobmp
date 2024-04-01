@@ -1,48 +1,45 @@
 package grupo3.utils;
 
 /**
- * A helper type for iterating over the bits of a byte array.
+ * A helper interface for iterating over bits.
  */
-public class BitIterator { // WHY CANT I JUST `impl Iterator<u8>` 😭😭 I wanna go back to Rust
-    int index;
-    int endIndex;
-    int bitIndex;
-    byte[] data;
+public interface BitIterator {
+    boolean hasNextBit();
 
-    public BitIterator(int index, int endIndex, int bitIndex, byte[] data) {
-        this.index = index;
-        this.endIndex = endIndex;
-        this.bitIndex = bitIndex;
-        this.data = data;
-    }
+    int nextBitOrMinusOne();
 
-    public BitIterator(int index, int endIndex, byte[] data) {
-        this(index, endIndex, 0, data);
-    }
-
-    public BitIterator(byte[] data) {
-        this(0, data.length, 0, data);
-    }
-
-    public boolean hasNextBit() {
-        return index < endIndex;
-    }
-
-    public byte nextBit() {
-        if (!hasNextBit()) {
+    default byte nextBit() {
+        int result = nextBitOrMinusOne();
+        if (result == -1) {
             throw new IllegalStateException("This BitIterator has reached its end");
         }
 
-        // Convert a byte to int as if it were unsigned
-        // Because java is a shitty language that doesn't have the concept an unsigned integer
-        int b = Byte.toUnsignedInt(data[index]);
-        int result = (b >> bitIndex) & 0x01;
+        return (byte) result;
+    }
 
-        if (bitIndex == 7) {
-            index++;
-            bitIndex = 0;
-        } else {
-            bitIndex++;
+    default byte nextBitOrZero() {
+        int result = nextBitOrMinusOne();
+        return result == -1 ? 0 : (byte) result;
+    }
+
+    default int nextByteOrMinusOne() {
+        int value = 0;
+        for (int i = 0; i < 8; i++) {
+            int bit = nextBitOrMinusOne();
+            if (bit == -1) {
+                return -1;
+            }
+
+            value |= (bit << i);
+        }
+
+        return value;
+    }
+
+    default int nextByte() {
+        int result = nextByteOrMinusOne();
+        if (result == -1) {
+            throw new IllegalStateException("This BitIterator has reached its end");
         }
 
         return (byte) result;

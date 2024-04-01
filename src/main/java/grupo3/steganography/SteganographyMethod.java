@@ -1,5 +1,8 @@
 package grupo3.steganography;
 
+/**
+ * An interface that defines a steganography method for hiding a message in a carrier.
+ */
 public interface SteganographyMethod {
     /**
      * Calculates the minimum size required for a carrier message to be capable of sending a hidden message.

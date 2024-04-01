@@ -1,7 +1,7 @@
 package grupo3;
 
 import grupo3.bmp.Bitmap;
-import grupo3.steganography.Lsb1Steganography;
+import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
 
 import java.io.IOException;
@@ -9,7 +9,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class Main {
-    private static Scanner s = new Scanner(System.in);
+    private final static Scanner s = new Scanner(System.in);
+    private final static SteganographyMethod steg = new LsbxSteganography(5);
 
     public static void main(String[] args) {
         System.out.println("Hello world!");
@@ -37,7 +38,6 @@ public class Main {
         Bitmap bitmap = Bitmap.readFromFile("carrier.bmp");
         System.out.format("\"carrier.bmp\" has a width of %d and height of %d%n", bitmap.getWidth(), bitmap.getHeight());
 
-        SteganographyMethod steg = new Lsb1Steganography();
         int carrierSize = bitmap.getData().length;
         int maxHiddenSize = steg.calculateHiddenSize(carrierSize);
         System.out.format("This means it can carry a message of up to %d bytes%n", maxHiddenSize);
@@ -60,7 +60,7 @@ public class Main {
     private static void revealMessage() throws IOException {
         System.out.println("Looking for file \"hidden.bmp\"...");
         Bitmap bitmap = Bitmap.readFromFile("hidden.bmp");
-        byte[] messageBytes = new Lsb1Steganography().extractMessage(bitmap.getData());
+        byte[] messageBytes = steg.extractMessage(bitmap.getData());
         String message = new String(messageBytes, StandardCharsets.UTF_8);
         System.out.format("The hidden message is: %s%n", message);
     }
