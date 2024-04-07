@@ -1,11 +1,15 @@
 package grupo3;
 
+import grupo3.arguments.Arguments;
 import grupo3.bmp.Bitmap;
+import grupo3.exceptions.ProgramArgumentsException;
 import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Main {
@@ -13,55 +17,58 @@ public class Main {
     private final static SteganographyMethod steg = new LsbxSteganography(5);
 
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        Arguments arguments = null;
+        try {
+            arguments = Arguments.parse(Arrays.stream(args).iterator());
+        } catch (ProgramArgumentsException e) {
+            System.err.println(e.getMessage());
+            System.exit(1);
+        }
 
         try {
-            while (true) {
-                System.out.print("Do you want to hide a message (1) or reveal one (2)? ");
-                String input = s.nextLine().trim();
-                if (input.equals("1")) {
-                    hideMessage();
-                } else if (input.equals("2")) {
-                    revealMessage();
-                } else {
-                    System.out.println("That's not an option 😒👎👎");
-                }
+            switch (arguments.request()) {
+                case Embed -> embedMessage(arguments);
+                case Extract -> extractMessage(arguments);
             }
-        } catch (Exception e) {
-            System.out.println("pero la PUCHA");
-            System.out.println(e);
+        } catch (IOException e) {
+            System.err.println("An unexpected error ocurred during execution: ");
+            System.err.println(e.getMessage());
         }
     }
 
-    private static void hideMessage() throws IOException {
-        System.out.println("Looking for file \"carrier.bmp\"...");
-        Bitmap bitmap = Bitmap.readFromFile("carrier.bmp");
-        System.out.format("\"carrier.bmp\" has a width of %d and height of %d%n", bitmap.getWidth(), bitmap.getHeight());
+    private static void embedMessage(Arguments arguments) throws IOException {
+        System.out.format("Reading file \"%s\"...%n", arguments.messageFile());
+        byte[] message = Files.readAllBytes(Paths.get(arguments.messageFile()));
+
+        System.out.format("Reading file \"%s\"...%n", arguments.carrierFile());
+        Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
+        System.out.format("\"%s\" has a width of %d and height of %d%n", arguments.carrierFile(), bitmap.getWidth(), bitmap.getHeight());
 
         int carrierSize = bitmap.getData().length;
         int maxHiddenSize = steg.calculateHiddenSize(carrierSize);
         System.out.format("This means it can carry a message of up to %d bytes%n", maxHiddenSize);
 
-        System.out.print("Enter the message to hide: ");
-        String line = s.nextLine().trim();
-        if (line.length() > maxHiddenSize) {
-            System.out.println("The message is too large for the carrier! Aborting");
+        if (message.length > maxHiddenSize) {
+            System.err.format("The message to hide is too long for this carrier! %d > %d%n", message.length, maxHiddenSize);
             return;
         }
 
-        byte[] messageBytes = line.getBytes(StandardCharsets.UTF_8);
-        steg.hideMessage(bitmap.getData(), messageBytes);
+        steg.hideMessage(bitmap.getData(), message);
 
-        System.out.print("Saving result to \"hidden.bmp\"...");
-        bitmap.writeToFile("hidden.bmp");
+        System.out.format("Saving result to \"%s\"...", arguments.outputFile());
+        bitmap.writeToFile(arguments.outputFile());
         System.out.println(" Done!");
     }
 
-    private static void revealMessage() throws IOException {
-        System.out.println("Looking for file \"hidden.bmp\"...");
-        Bitmap bitmap = Bitmap.readFromFile("hidden.bmp");
-        byte[] messageBytes = steg.extractMessage(bitmap.getData());
-        String message = new String(messageBytes, StandardCharsets.UTF_8);
-        System.out.format("The hidden message is: %s%n", message);
+    private static void extractMessage(Arguments arguments) throws IOException {
+        System.out.format("Reading file \"%s\"...%n", arguments.carrierFile());
+        Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
+
+        System.out.println("Extracting message...");
+        byte[] message = steg.extractMessage(bitmap.getData());
+
+        System.out.format("Saving result to \"%s\"...", arguments.outputFile());
+        Files.write(Paths.get(arguments.outputFile()), message);
+        System.out.println(" Done!");
     }
 }
