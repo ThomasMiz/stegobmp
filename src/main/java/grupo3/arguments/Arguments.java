@@ -1,5 +1,8 @@
 package grupo3.arguments;
 
+import grupo3.encryption.EncryptionMode;
+import grupo3.encryption.EncryptionOptions;
+import grupo3.encryption.algorithms.*;
 import grupo3.exceptions.ProgramArgumentsException;
 import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
@@ -79,7 +82,7 @@ public record Arguments(
         String outputFile = null;
         SteganographyMethod steganographyMethod = null;
 
-        Object encryptionAlgorithm = null;
+        EncryptionAlgorithm encryptionAlgorithm = null;
         EncryptionMode encryptionMode = null;
         String encryptionPassword = null;
 
@@ -169,15 +172,10 @@ public record Arguments(
 
                 String algorithm = args.next();
                 encryptionAlgorithm = switch (algorithm.toLowerCase().trim()) {
-                    // case "aes128" -> new Aes128Encryption();
-                    // case "aes196" -> new Aes196Encrpyption();
-                    // case "aes256" -> new Aes256Encryption();
-                    // case "des" -> new DesEncryption();
-                    case "shut_up_compiler" -> "remove this line once actual methods are implemented";
-                    case "aes128" -> throw new UnsupportedOperationException("AES128 hasn't been implemented yet");
-                    case "aes196" -> throw new UnsupportedOperationException("AES196 hasn't been implemented yet");
-                    case "aes256" -> throw new UnsupportedOperationException("AES256 hasn't been implemented yet");
-                    case "des" -> throw new UnsupportedOperationException("DES hasn't been implemented yet");
+                    case "aes128" -> AES128Encryption.getInstance();
+                    case "aes192" -> AES192Encryption.getInstance();
+                    case "aes256" -> AES256Encryption.getInstance();
+                    case "des" -> DESEncryption.getInstance();
                     default -> throw new ProgramArgumentsException("Unknown encryption algorithm: " + algorithm);
                 };
             } else if (arg.equalsIgnoreCase("-m")) {
@@ -237,6 +235,7 @@ public record Arguments(
             throw new ProgramArgumentsException("You must specify a steganography method with -steg <LSB1 | LSB2 | ... | LSB7 | LSBI>");
         }
 
+        // TODO: SET DEFAULT VALUES
         EncryptionOptions encryptionOptions = null;
         if (encryptionAlgorithm != null || encryptionMode != null || encryptionPassword != null) {
             String message = "";
