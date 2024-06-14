@@ -35,7 +35,7 @@ public class FileEncryptor {
         final byte[] fileBytes = Files.readAllBytes(path);
         final String encryptedBase64 = new String(fileBytes);
         final byte[] encryptedBytes = Base64.getDecoder().decode(encryptedBase64);
-        final byte[] decryptedBytes = options.algorithm().decrypt(fileBytes, options.mode(), options.password());
+        final byte[] decryptedBytes = options.algorithm().decrypt(encryptedBytes, options.mode(), options.password());
         Files.write(path, decryptedBytes);
     }
 }
