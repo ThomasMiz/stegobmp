@@ -1,4 +1,6 @@
-package grupo3.arguments;
+package grupo3.encryption;
+
+import grupo3.encryption.algorithms.EncryptionAlgorithm;
 
 /**
  * Represents the encryption options specified by a user
@@ -8,14 +10,14 @@ package grupo3.arguments;
  * @param password  The password to encrypt with.
  */
 public record EncryptionOptions(
-        Object algorithm, // TODO: Change type once encryption is implemented.
+        EncryptionAlgorithm algorithm,
         EncryptionMode mode,
         String password
 ) {
     /**
      * The encryption algorithm to use.
      */
-    public Object algorithm() {
+    public EncryptionAlgorithm algorithm() {
         return algorithm;
     }
 
