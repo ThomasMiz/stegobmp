@@ -51,7 +51,12 @@ public class Main {
             return;
         }
 
-        arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
+        if (arguments.encryptionOptions() == null) {
+            arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, null);
+        }
+        else {
+            arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
+        }
 
         System.out.format("Saving result to \"%s\"...", arguments.outputFile());
         bitmap.writeToFile(arguments.outputFile());
@@ -63,7 +68,15 @@ public class Main {
         Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
 
         System.out.println("Extracting message...");
-        byte[] message = arguments.steganographyMethod().extractMessage(bitmap.getData());
+
+        byte[] message;
+
+        if (arguments.encryptionOptions() == null) {
+            message = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
+        }
+        else {
+            message = arguments.steganographyMethod().extractMessage(bitmap.getData());
+        }
 
         System.out.format("Saving result to \"%s\"...", arguments.outputFile());
         Files.write(Paths.get(arguments.outputFile()), message);

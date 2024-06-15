@@ -31,6 +31,8 @@ public interface SteganographyMethod {
      */
     void hideMessage(byte[] carrier, byte[] message);
 
+    void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension);
+
     /**
      * Extracts a message from a carrier message.
      * <p>
@@ -39,4 +41,6 @@ public interface SteganographyMethod {
      * @return A new array with the extracted message.
      */
     byte[] extractMessage(byte[] carrier);
+
+    byte[] extractMessageWithExtension(byte[] carrier);
 }
