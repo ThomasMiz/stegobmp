@@ -89,6 +89,11 @@ public class LsbiSteganography implements SteganographyMethod {
     }
 
     @Override
+    public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
+
+    }
+
+    @Override
     public byte[] extractMessage(byte[] carrier) {
 
         // Read the inversion information from the first four bytes
@@ -113,6 +118,11 @@ public class LsbiSteganography implements SteganographyMethod {
         }
 
         return message;
+    }
+
+    @Override
+    public byte[] extractMessageWithExtension(byte[] carrier) {
+        return new byte[0];
     }
 
     private int getNextIdxSkipRed(int idx) {

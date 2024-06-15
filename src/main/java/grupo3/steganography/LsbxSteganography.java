@@ -71,6 +71,11 @@ public class LsbxSteganography implements SteganographyMethod {
     }
 
     @Override
+    public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
+
+    }
+
+    @Override
     public byte[] extractMessage(byte[] carrier) {
         BitIterator bits = new SkipBitIterator(new ByteArrayBitIterator(carrier), bitCount);
 
@@ -82,5 +87,10 @@ public class LsbxSteganography implements SteganographyMethod {
         }
 
         return message;
+    }
+
+    @Override
+    public byte[] extractMessageWithExtension(byte[] carrier) {
+        return new byte[0];
     }
 }
