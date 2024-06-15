@@ -90,7 +90,7 @@ public class LsbiSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-
+        hideMessage(carrier, message);
     }
 
     @Override
@@ -122,7 +122,7 @@ public class LsbiSteganography implements SteganographyMethod {
 
     @Override
     public byte[] extractMessageWithExtension(byte[] carrier) {
-        return new byte[0];
+        return extractMessage(carrier);
     }
 
     private int getNextIdxSkipRed(int idx) {
