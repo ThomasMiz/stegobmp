@@ -17,7 +17,7 @@ public class BigEndianIntBitIterator implements BitIterator {
 
     @Override
     public boolean hasNextBit() {
-        return bitIndex >= 0;
+        return bitIndex < 32;
     }
 
     @Override
@@ -27,7 +27,7 @@ public class BigEndianIntBitIterator implements BitIterator {
         }
 
         int result = (value >> (31 - bitIndex)) & 0x01;
-        bitIndex -= 1;
+        bitIndex += 1;
         return result;
     }
 }

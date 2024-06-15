@@ -14,8 +14,6 @@ import java.util.Scanner;
 
 public class Main {
     private final static Scanner s = new Scanner(System.in);
-    private final static SteganographyMethod steg = new LsbxSteganography(5);
-
     public static void main(String[] args) {
         Arguments arguments = null;
         try {
@@ -45,7 +43,7 @@ public class Main {
         System.out.format("\"%s\" has a width of %d and height of %d%n", arguments.carrierFile(), bitmap.getWidth(), bitmap.getHeight());
 
         int carrierSize = bitmap.getData().length;
-        int maxHiddenSize = steg.calculateHiddenSize(carrierSize);
+        int maxHiddenSize = arguments.steganographyMethod().calculateHiddenSize(carrierSize);
         System.out.format("This means it can carry a message of up to %d bytes%n", maxHiddenSize);
 
         if (message.length > maxHiddenSize) {
@@ -53,7 +51,7 @@ public class Main {
             return;
         }
 
-        steg.hideMessage(bitmap.getData(), message);
+        arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
 
         System.out.format("Saving result to \"%s\"...", arguments.outputFile());
         bitmap.writeToFile(arguments.outputFile());
@@ -65,7 +63,7 @@ public class Main {
         Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
 
         System.out.println("Extracting message...");
-        byte[] message = steg.extractMessage(bitmap.getData());
+        byte[] message = arguments.steganographyMethod().extractMessage(bitmap.getData());
 
         System.out.format("Saving result to \"%s\"...", arguments.outputFile());
         Files.write(Paths.get(arguments.outputFile()), message);

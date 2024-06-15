@@ -4,6 +4,7 @@ import grupo3.encryption.EncryptionMode;
 import grupo3.encryption.EncryptionOptions;
 import grupo3.encryption.algorithms.*;
 import grupo3.exceptions.ProgramArgumentsException;
+import grupo3.steganography.LsbiSteganography;
 import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
 
@@ -154,7 +155,7 @@ public record Arguments(
                     if (ch > '0' && ch <= '8') {
                         steganographyMethod = new LsbxSteganography(ch - '0');
                     } else if (ch == 'i') {
-                        throw new UnsupportedOperationException("LSBI steganography hasn't been implemented yet");
+                        steganographyMethod = new LsbiSteganography();
                     }
                 }
 
