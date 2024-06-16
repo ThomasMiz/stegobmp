@@ -8,30 +8,42 @@ public enum EncryptionMode {
     /**
      * Indicates Electronic Code Book Mode.
      */
-    ECB("ECB"),
+    ECB("ECB", true, false),
 
     /**
      * Indicates Cipher Block Chaining.
      */
-    CBC("CBC"),
+    CBC("CBC", true, true),
 
     /**
      * Indicates Cipher Feedback Mode.
      */
-    CFB("CFB8"),
+    CFB("CFB8", false, true),
 
     /**
      * Indicates Output Feedback Mode.
      */
-    OFB("OFB");
+    OFB("OFB", false, true);
 
     private final String mode;
+    private final boolean usePadding;
+    private final boolean useIV;
 
-    EncryptionMode(String mode) {
+    EncryptionMode(String mode, boolean usePadding, boolean useIV) {
         this.mode = mode;
+        this.usePadding = usePadding;
+        this.useIV = useIV;
     }
 
     public String getMode() {
         return mode;
+    }
+
+    public boolean usePadding() {
+        return usePadding;
+    }
+
+    public boolean useIV() {
+        return useIV;
     }
 }
