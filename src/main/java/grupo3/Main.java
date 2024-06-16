@@ -14,8 +14,6 @@ import java.util.Scanner;
 
 public class Main {
     private final static Scanner s = new Scanner(System.in);
-    private final static SteganographyMethod steg = new LsbxSteganography(5);
-
     public static void main(String[] args) {
         Arguments arguments = null;
         try {
@@ -30,13 +28,13 @@ public class Main {
                 case Embed -> embedMessage(arguments);
                 case Extract -> extractMessage(arguments);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("An unexpected error ocurred during execution: ");
             System.err.println(e.getMessage());
         }
     }
 
-    private static void embedMessage(Arguments arguments) throws IOException {
+    private static void embedMessage(Arguments arguments) throws IOException, ProgramArgumentsException {
         System.out.format("Reading file \"%s\"...%n", arguments.messageFile());
         byte[] message = Files.readAllBytes(Paths.get(arguments.messageFile()));
 
@@ -45,7 +43,7 @@ public class Main {
         System.out.format("\"%s\" has a width of %d and height of %d%n", arguments.carrierFile(), bitmap.getWidth(), bitmap.getHeight());
 
         int carrierSize = bitmap.getData().length;
-        int maxHiddenSize = steg.calculateHiddenSize(carrierSize);
+        int maxHiddenSize = arguments.steganographyMethod().calculateHiddenSize(carrierSize);
         System.out.format("This means it can carry a message of up to %d bytes%n", maxHiddenSize);
 
         if (message.length > maxHiddenSize) {
@@ -53,7 +51,12 @@ public class Main {
             return;
         }
 
-        steg.hideMessage(bitmap.getData(), message);
+        if (arguments.encryptionOptions() == null) {
+            arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, getFileExtension(arguments.messageFile()));
+        }
+        else {
+            arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
+        }
 
         System.out.format("Saving result to \"%s\"...", arguments.outputFile());
         bitmap.writeToFile(arguments.outputFile());
@@ -65,10 +68,34 @@ public class Main {
         Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
 
         System.out.println("Extracting message...");
-        byte[] message = steg.extractMessage(bitmap.getData());
 
-        System.out.format("Saving result to \"%s\"...", arguments.outputFile());
-        Files.write(Paths.get(arguments.outputFile()), message);
+        byte[] message;
+
+        if (arguments.encryptionOptions() == null) {
+            message = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
+        }
+        else {
+            message = arguments.steganographyMethod().extractMessage(bitmap.getData());
+        }
+
+        System.out.format("Saving result to \"%s%s\"...", arguments.outputFile(), arguments.steganographyMethod().getFileExtension());
+        Files.write(Paths.get(arguments.outputFile()+arguments.steganographyMethod().getFileExtension()), message);
         System.out.println(" Done!");
+    }
+
+    private static String getFileExtension(String filename) throws ProgramArgumentsException {
+        if (filename == null || filename.isEmpty()) {
+            throw new ProgramArgumentsException("out filename should not be empty");
+        }
+
+        int dotIndex = filename.lastIndexOf('.');
+
+        // Check if the dot is found and it is not the first character
+        if (dotIndex > 0 && dotIndex < filename.length() - 1) {
+            return filename.substring(dotIndex);
+        }
+
+        // No extension found
+        throw new ProgramArgumentsException("out filename should have an extension");
     }
 }

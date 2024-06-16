@@ -71,10 +71,15 @@ public class LsbxSteganography implements SteganographyMethod {
     }
 
     @Override
+    public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
+
+    }
+
+    @Override
     public byte[] extractMessage(byte[] carrier) {
         BitIterator bits = new SkipBitIterator(new ByteArrayBitIterator(carrier), bitCount);
 
-        int messageLength = bits.nextByte() | (bits.nextByte() << 8) | (bits.nextByte() << 16) | (bits.nextByte() << 24);
+        int messageLength = (bits.nextByte() << 24) | (bits.nextByte() << 16) | (bits.nextByte() << 8) | (bits.nextByte());
         byte[] message = new byte[messageLength];
 
         for (int i = 0; i < message.length; i++) {
@@ -82,5 +87,15 @@ public class LsbxSteganography implements SteganographyMethod {
         }
 
         return message;
+    }
+
+    @Override
+    public byte[] extractMessageWithExtension(byte[] carrier) {
+        return new byte[0];
+    }
+
+    @Override
+    public String getFileExtension() {
+        return null;
     }
 }
