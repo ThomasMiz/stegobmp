@@ -9,6 +9,7 @@ import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
 
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  * Represents the parsed arguments passed to this program.
@@ -28,6 +29,9 @@ public record Arguments(
         SteganographyMethod steganographyMethod,
         EncryptionOptions encryptionOptions
 ) {
+
+    private static final Logger logger = Logger.getLogger(Arguments.class.getName());
+
     /**
      * Specifies whether the user requested to embed or extract a message.
      */
@@ -236,24 +240,19 @@ public record Arguments(
             throw new ProgramArgumentsException("You must specify a steganography method with -steg <LSB1 | LSB2 | ... | LSB7 | LSBI>");
         }
 
-        // TODO: SET DEFAULT VALUES
         EncryptionOptions encryptionOptions = null;
-        if (encryptionAlgorithm != null || encryptionMode != null || encryptionPassword != null) {
-            String message = "";
+        if (encryptionPassword != null) {
+
+            // Default to AES128 if encryption algorithm is not specified
             if (encryptionAlgorithm == null) {
-                message += "    -> Specify an encryption algorithm: -a <aes128 | aes192 | aes256 | des>\n";
+                logger.info("Encryption algorithm not specified. Defaulting to AES128.");
+                encryptionAlgorithm = AES128Encryption.getInstance();
             }
 
+            // Default to CBC mode if encryption mode is not specified
             if (encryptionMode == null) {
-                message += "    -> Specify a block cypher operation mode: -m <ecb | cfb | ofb | cbc>";
-            }
-
-            if (encryptionPassword == null) {
-                message += "    -> Specify an encryption password: -pass <password>";
-            }
-
-            if (!message.isEmpty()) {
-                throw new ProgramArgumentsException("When using encryption, all three encryption arguments must be specified:" + message);
+                logger.info("Encryption mode not specified. Defaulting to CBC.");
+                encryptionMode = EncryptionMode.CBC;
             }
 
             encryptionOptions = new EncryptionOptions(encryptionAlgorithm, encryptionMode, encryptionPassword);
