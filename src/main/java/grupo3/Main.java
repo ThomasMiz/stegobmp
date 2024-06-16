@@ -84,34 +84,28 @@ public class Main {
 
             System.out.println("Extracting message...");
 
+            byte[] messageData;
+            String fileExtension;
+
             if (arguments.encryptionOptions() == null) {
-                byte[] message = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
-                final String outputFilePath = arguments.outputFile() + arguments.steganographyMethod().getFileExtension();
-                FileUtils.writeToFile(outputFilePath, message);
+                messageData = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
+                fileExtension = arguments.steganographyMethod().getFileExtension();
             } else {
-                byte[] encryptedMessage = arguments.steganographyMethod().extractMessage(bitmap.getData());
-                final EncryptionOptions options = arguments.encryptionOptions();
+                final byte[] encryptedMessage = arguments.steganographyMethod().extractMessage(bitmap.getData());
+                final byte[] decryptedBytes = arguments.encryptionOptions().decrypt(encryptedMessage);
 
-                byte[] decryptedBytes;
-                try {
-                    decryptedBytes = options.algorithm().decrypt(encryptedMessage, options.mode(), options.password());
-                } catch (Exception e) {
-                    throw new EncryptionException("Error decrypting: " + e.getMessage());
-                }
-
-                final SteganographyDataProcessor dataUtils = new SteganographyDataProcessor(decryptedBytes);
-                byte[] data = dataUtils.getData();
-                String fileExtension = dataUtils.getFileExtension();
-
-                String outputFile = arguments.outputFile() + fileExtension;
-                FileUtils.writeToFile(outputFile, data);
+                final SteganographyDataProcessor steganographyDataProcessor = new SteganographyDataProcessor(decryptedBytes);
+                messageData = steganographyDataProcessor.getData();
+                fileExtension = steganographyDataProcessor.getFileExtension();
             }
 
-            System.out.format("Saving result to \"%s%s\"...", arguments.outputFile(), arguments.steganographyMethod().getFileExtension());
-            System.out.println(" Done!");
+            final String outputFilePath = arguments.outputFile() + fileExtension;
+            FileUtils.writeToFile(outputFilePath, messageData);
+
+            System.out.format("Saving result to \"%s%s\"... Done!%n", arguments.outputFile(), fileExtension);
+
         } catch (IOException | EncryptionException e) {
-            System.err.println("Error extracting message:");
-            System.err.println(e.getMessage());
+            System.err.println("Error extracting message: " + e.getMessage());
         }
     }
 }

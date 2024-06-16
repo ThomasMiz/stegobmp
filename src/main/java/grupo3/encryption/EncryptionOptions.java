@@ -1,6 +1,7 @@
 package grupo3.encryption;
 
 import grupo3.encryption.algorithms.EncryptionAlgorithm;
+import grupo3.exceptions.EncryptionException;
 
 /**
  * Represents the encryption options specified by a user
@@ -17,6 +18,7 @@ public record EncryptionOptions(
     /**
      * The encryption algorithm to use.
      */
+    @Override
     public EncryptionAlgorithm algorithm() {
         return algorithm;
     }
@@ -35,5 +37,35 @@ public record EncryptionOptions(
     @Override
     public String password() {
         return password;
+    }
+
+    /**
+     * Encrypts the given data using the specified algorithm, mode, and password.
+     *
+     * @param data The data to encrypt.
+     * @return The encrypted data.
+     * @throws EncryptionException If an error occurs during encryption.
+     */
+    public byte[] encrypt(byte[] data) throws EncryptionException {
+        try {
+            return algorithm.encrypt(data, mode, password);
+        } catch (Exception e) {
+            throw new EncryptionException("Error encrypting data: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Decrypts the given data using the specified algorithm, mode, and password.
+     *
+     * @param encryptedData The data to decrypt.
+     * @return The decrypted data.
+     * @throws EncryptionException If an error occurs during decryption.
+     */
+    public byte[] decrypt(byte[] encryptedData) throws EncryptionException {
+        try {
+            return algorithm.decrypt(encryptedData, mode, password);
+        } catch (Exception e) {
+            throw new EncryptionException("Error decrypting data: " + e.getMessage(), e);
+        }
     }
 }
