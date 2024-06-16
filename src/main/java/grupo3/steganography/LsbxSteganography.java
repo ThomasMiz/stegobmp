@@ -93,4 +93,9 @@ public class LsbxSteganography implements SteganographyMethod {
     public byte[] extractMessageWithExtension(byte[] carrier) {
         return new byte[0];
     }
+
+    @Override
+    public String getFileExtension() {
+        return null;
+    }
 }

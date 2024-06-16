@@ -28,13 +28,13 @@ public class Main {
                 case Embed -> embedMessage(arguments);
                 case Extract -> extractMessage(arguments);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.err.println("An unexpected error ocurred during execution: ");
             System.err.println(e.getMessage());
         }
     }
 
-    private static void embedMessage(Arguments arguments) throws IOException {
+    private static void embedMessage(Arguments arguments) throws IOException, ProgramArgumentsException {
         System.out.format("Reading file \"%s\"...%n", arguments.messageFile());
         byte[] message = Files.readAllBytes(Paths.get(arguments.messageFile()));
 
@@ -52,7 +52,7 @@ public class Main {
         }
 
         if (arguments.encryptionOptions() == null) {
-            arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, null);
+            arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, getFileExtension(arguments.messageFile()));
         }
         else {
             arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
@@ -78,8 +78,24 @@ public class Main {
             message = arguments.steganographyMethod().extractMessage(bitmap.getData());
         }
 
-        System.out.format("Saving result to \"%s\"...", arguments.outputFile());
-        Files.write(Paths.get(arguments.outputFile()), message);
+        System.out.format("Saving result to \"%s%s\"...", arguments.outputFile(), arguments.steganographyMethod().getFileExtension());
+        Files.write(Paths.get(arguments.outputFile()+arguments.steganographyMethod().getFileExtension()), message);
         System.out.println(" Done!");
+    }
+
+    private static String getFileExtension(String filename) throws ProgramArgumentsException {
+        if (filename == null || filename.isEmpty()) {
+            throw new ProgramArgumentsException("out filename should not be empty");
+        }
+
+        int dotIndex = filename.lastIndexOf('.');
+
+        // Check if the dot is found and it is not the first character
+        if (dotIndex > 0 && dotIndex < filename.length() - 1) {
+            return filename.substring(dotIndex);
+        }
+
+        // No extension found
+        throw new ProgramArgumentsException("out filename should have an extension");
     }
 }
