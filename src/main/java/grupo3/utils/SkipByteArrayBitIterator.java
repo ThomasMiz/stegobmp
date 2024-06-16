@@ -1,6 +1,6 @@
 package grupo3.utils;
 
-public class SkipByteArrayBitIterator implements BitIterator{
+public class SkipByteArrayBitIterator implements BitIterator {
 
     private int index;
     private final int endIndex;
@@ -49,7 +49,7 @@ public class SkipByteArrayBitIterator implements BitIterator{
     public int nextByte() {
         int toReturn = 0;
 
-        for (int i = 0 ; i < 8 ; ++i) {
+        for (int i = 0; i < 8; i++) {
             if (!hasNextBit()) {
                 throw new IllegalStateException("This BitIterator has reached its end");
             }
@@ -57,5 +57,4 @@ public class SkipByteArrayBitIterator implements BitIterator{
         }
         return toReturn;
     }
-
 }

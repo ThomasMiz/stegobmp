@@ -3,7 +3,7 @@ package grupo3.utils;
 public class BigEndianIntBitIterator implements BitIterator {
     private final int value;
     private int bitIndex;
-    private int byteIndex;
+    private final int byteIndex;
 
     public BigEndianIntBitIterator(int value, int bitIndex, int byteIndex) {
         this.value = value;

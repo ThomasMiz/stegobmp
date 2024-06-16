@@ -37,7 +37,7 @@ public class ByteArrayBigEndianBitIterator implements BitIterator {
 
         // Convert a byte to int as if it were unsigned
         int b = Byte.toUnsignedInt(data[index]);
-        int result = (b >> (7-bitIndex)) & 0x01;
+        int result = (b >> (7 - bitIndex)) & 0x01;
 
         if (bitIndex == 7) {
             index++;

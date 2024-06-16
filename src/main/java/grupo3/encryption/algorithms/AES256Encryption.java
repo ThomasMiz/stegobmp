@@ -6,7 +6,7 @@ public class AES256Encryption extends AbstractAESEncryption {
 
     private static final AES256Encryption instance = new AES256Encryption();
 
-    private AES256Encryption() { super(KEY_SIZE_BYTES); }
+    private AES256Encryption() {super(KEY_SIZE_BYTES);}
 
     public static AES256Encryption getInstance() {
         return instance;

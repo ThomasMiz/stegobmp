@@ -116,7 +116,7 @@ public abstract class EncryptionAlgorithm {
     /**
      * Derives a secret key using PBKDF2 with HMAC SHA-256.
      *
-     * @param password           The password used for key derivation.
+     * @param password            The password used for key derivation.
      * @param secretKeyLengthBits The desired length of the secret key in bits.
      * @return The derived secret key.
      * @throws NoSuchAlgorithmException If no such algorithm exists.
@@ -131,9 +131,9 @@ public abstract class EncryptionAlgorithm {
     /**
      * Extracts a symmetric encryption key from a derived secret key.
      *
-     * @param derivedKey The derived secret key containing both key and IV.
+     * @param derivedKey   The derived secret key containing both key and IV.
      * @param keySizeBytes The size of the encryption key in bytes.
-     * @param algorithm The name of the encryption algorithm.
+     * @param algorithm    The name of the encryption algorithm.
      * @return The extracted encryption key.
      */
     private Key extractKey(SecretKey derivedKey, int keySizeBytes, String algorithm) {
@@ -145,8 +145,8 @@ public abstract class EncryptionAlgorithm {
     /**
      * Extracts an initialization vector (IV) from a derived secret key.
      *
-     * @param derivedKey    The derived secret key containing both key and IV.
-     * @param keySizeBytes  The size of the encryption key in bytes.
+     * @param derivedKey     The derived secret key containing both key and IV.
+     * @param keySizeBytes   The size of the encryption key in bytes.
      * @param blockSizeBytes The size of the encryption block in bytes.
      * @return The extracted initialization vector (IV).
      */
