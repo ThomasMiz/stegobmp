@@ -11,8 +11,10 @@ public class Bitmap {
     private final int width;
     private final int height;
     private final byte[] data;
+    private final BmpFileHeader fileHeader;
+    private final BmpInfoHeader infoHeader;
 
-    public Bitmap(int width, int height, byte[] data) {
+    public Bitmap(int width, int height, byte[] data, BmpFileHeader fileHeader, BmpInfoHeader infoHeader) {
         if (width * height * 3 != data.length) {
             throw new IllegalArgumentException("The length of the data array must equal width*height*3");
         }
@@ -20,6 +22,12 @@ public class Bitmap {
         this.width = width;
         this.height = height;
         this.data = data;
+        this.fileHeader = fileHeader;
+        this.infoHeader = infoHeader;
+    }
+
+    public Bitmap(int width, int height, byte[] data) {
+        this(width, height, data, null, null);
     }
 
     public int getWidth() {
@@ -34,6 +42,14 @@ public class Bitmap {
         return data;
     }
 
+    public BmpFileHeader getFileHeader() {
+        return fileHeader;
+    }
+
+    public BmpInfoHeader getInfoHeader() {
+        return infoHeader;
+    }
+
     public void writeToFile(String filename) throws IOException {
         try (OutputStream stream = new FileOutputStream(filename)) {
             writeToStream(stream);
@@ -44,13 +60,20 @@ public class Bitmap {
         int widthInBytes = this.width * 3;
         int paddingSize = (4 - (widthInBytes) % 4) % 4;
 
-        BmpFileHeader fileHeader = new BmpFileHeader(
-                BmpFileHeader.SIZE + BmpInfoHeader.SIZE + widthInBytes * this.height,
-                BmpFileHeader.SIZE + BmpInfoHeader.SIZE
-        );
-        fileHeader.writeTo(stream);
+        BmpFileHeader fileHeader = this.fileHeader;
+        if (fileHeader == null) {
+            fileHeader = new BmpFileHeader(
+                    BmpFileHeader.SIZE + BmpInfoHeader.SIZE + widthInBytes * this.height,
+                    BmpFileHeader.SIZE + BmpInfoHeader.SIZE
+            );
+        }
 
-        BmpInfoHeader infoHeader = new BmpInfoHeader(this.width, this.height);
+        BmpInfoHeader infoHeader = this.infoHeader;
+        if (infoHeader == null) {
+            infoHeader = new BmpInfoHeader(this.width, this.height);
+        }
+
+        fileHeader.writeTo(stream);
         infoHeader.writeTo(stream);
 
         int stride = this.width * 3;
@@ -85,6 +108,6 @@ public class Bitmap {
             StreamUtils.readIgnore(stream, paddingSize);
         }
 
-        return new Bitmap(infoHeader.width, infoHeader.height, data);
+        return new Bitmap(infoHeader.width, infoHeader.height, data, fileHeader, infoHeader);
     }
 }
