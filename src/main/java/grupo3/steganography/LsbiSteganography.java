@@ -6,9 +6,6 @@ import grupo3.utils.*;
 import java.util.AbstractMap;
 import java.util.HashMap;
 
-/**
- * A Steganography method that hides information in the N lowest significant bits of the carrier.
- */
 public class LsbiSteganography implements SteganographyMethod {
 
     private String fileExtension;

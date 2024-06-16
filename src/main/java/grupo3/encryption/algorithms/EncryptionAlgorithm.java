@@ -2,94 +2,167 @@ package grupo3.encryption.algorithms;
 
 import grupo3.encryption.EncryptionMode;
 
-import javax.crypto.Cipher;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
+import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.SecureRandom;
-import java.util.Arrays;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 
+/**
+ * Abstract base class for encryption algorithms using symmetric keys.
+ */
 public abstract class EncryptionAlgorithm {
 
-    private static final String KEY_DERIVATION_ALGORITHM = "PBKDF2WithHmacSHA256";
-    private static final int KEY_DERIVATION_ALGORITHM_ITERATIONS = 10000;
-    private static final byte[] NO_SALT = new byte[] {0};
+    private static final String SECRET_KEY_DERIVATION_ALGORITHM = "PBKDF2WithHmacSHA256";
+    private static final int SECRET_KEY_DERIVATION_ALGORITHM_ITERATIONS = 10000;
+    private static final int SALT_SIZE_BYTES = 8;
+    private static final byte[] FIXED_SALT = new byte[SALT_SIZE_BYTES];
 
     private final String algorithmName;
-    private final int keySizeBits;
+    private final int keySizeBytes;
     private final int blockSizeBytes;
-    private final int saltSizeBytes;
 
-    EncryptionAlgorithm(String algorithmName, int keySizeBits, int blockSizeBytes, int saltSizeBytes) {
+    /**
+     * Constructs an EncryptionAlgorithm instance.
+     *
+     * @param algorithmName  The name of the encryption algorithm.
+     * @param keySizeBytes   The size of the encryption key in bytes.
+     * @param blockSizeBytes The size of the encryption block in bytes.
+     */
+    EncryptionAlgorithm(String algorithmName, int keySizeBytes, int blockSizeBytes) {
         this.algorithmName = algorithmName;
-        this.keySizeBits = keySizeBits;
+        this.keySizeBytes = keySizeBytes;
         this.blockSizeBytes = blockSizeBytes;
-        this.saltSizeBytes = saltSizeBytes;
     }
 
-    public byte[] encrypt(byte[] input, EncryptionMode mode, String password) throws Exception {
-        final byte[] salt = generateSalt(this.saltSizeBytes);
+    /**
+     * Encrypts the given input data.
+     *
+     * @param input    The input data to be encrypted.
+     * @param mode     The encryption mode specifying encryption details.
+     * @param password The password used for encryption key derivation.
+     * @return The encrypted data.
+     * @throws InvalidAlgorithmParameterException If invalid algorithm parameters are encountered.
+     * @throws NoSuchPaddingException             If no such padding scheme is available.
+     * @throws IllegalBlockSizeException          If the block size is illegal for the cipher.
+     * @throws NoSuchAlgorithmException           If no such algorithm exists.
+     * @throws InvalidKeySpecException            If the provided key specification is invalid.
+     * @throws BadPaddingException                If invalid padding is encountered.
+     * @throws InvalidKeyException                If an invalid key is encountered.
+     */
+    public byte[] encrypt(byte[] input, EncryptionMode mode, String password) throws InvalidAlgorithmParameterException,
+            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException,
+            BadPaddingException, InvalidKeyException {
+        return processCipher(Cipher.ENCRYPT_MODE, input, mode, password);
+    }
 
-        final Key key = this.deriveKey(password, this.keySizeBits, this.algorithmName, salt);
-        final String transformation = this.algorithmName + "/" + mode.getMode() + (input.length % this.blockSizeBytes == 0 ? "NoPadding" : "PKCS5Padding");
+    /**
+     * Decrypts the given input data.
+     *
+     * @param input    The input data to be decrypted.
+     * @param mode     The encryption mode specifying decryption details.
+     * @param password The password used for decryption key derivation.
+     * @return The decrypted data.
+     * @throws InvalidAlgorithmParameterException If invalid algorithm parameters are encountered.
+     * @throws NoSuchPaddingException             If no such padding scheme is available.
+     * @throws IllegalBlockSizeException          If the block size is illegal for the cipher.
+     * @throws NoSuchAlgorithmException           If no such algorithm exists.
+     * @throws InvalidKeySpecException            If the provided key specification is invalid.
+     * @throws BadPaddingException                If invalid padding is encountered.
+     * @throws InvalidKeyException                If an invalid key is encountered.
+     */
+    public byte[] decrypt(byte[] input, EncryptionMode mode, String password) throws InvalidAlgorithmParameterException,
+            NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, InvalidKeySpecException,
+            BadPaddingException, InvalidKeyException {
+        return processCipher(Cipher.DECRYPT_MODE, input, mode, password);
+    }
+
+    /**
+     * Processes encryption or decryption based on the cipher mode.
+     *
+     * @param cipherMode The cipher mode (ENCRYPT_MODE or DECRYPT_MODE).
+     * @param input      The input data to be processed.
+     * @param mode       The encryption mode specifying details.
+     * @param password   The password used for key derivation.
+     * @return The processed data (encrypted or decrypted).
+     * @throws NoSuchAlgorithmException           If no such algorithm exists.
+     * @throws InvalidKeySpecException            If the provided key specification is invalid.
+     * @throws NoSuchPaddingException             If no such padding scheme is available.
+     * @throws InvalidAlgorithmParameterException If invalid algorithm parameters are encountered.
+     * @throws InvalidKeyException                If an invalid key is encountered.
+     * @throws IllegalBlockSizeException          If the block size is illegal for the cipher.
+     * @throws BadPaddingException                If invalid padding is encountered.
+     */
+    private byte[] processCipher(int cipherMode, byte[] input, EncryptionMode mode, String password) throws NoSuchAlgorithmException,
+            InvalidKeySpecException, NoSuchPaddingException, InvalidAlgorithmParameterException,
+            InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+        final int secretKeyLengthBits = bytesToBits(keySizeBytes + (mode.useIV() ? blockSizeBytes : 0));
+        final SecretKey derivedKey = deriveSecretKey(password, secretKeyLengthBits);
+
+        final Key key = extractKey(derivedKey, keySizeBytes, algorithmName);
+        final IvParameterSpec iv = mode.useIV() ? extractIV(derivedKey, keySizeBytes, blockSizeBytes) : null;
+
+        final String transformation = algorithmName + "/" + mode.getMode() + (mode.usePadding() ? "/PKCS5Padding" : "/NoPadding");
         final Cipher cipher = Cipher.getInstance(transformation);
 
-        final IvParameterSpec iv = this.generateIV(this.blockSizeBytes);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-
-        final byte[] cipherText = cipher.doFinal(input);
-        final byte[] combined = new byte[this.saltSizeBytes + iv.getIV().length + cipherText.length];
-        System.arraycopy(salt, 0, combined, 0, this.saltSizeBytes);
-        System.arraycopy(iv.getIV(), 0, combined, this.saltSizeBytes, iv.getIV().length);
-        System.arraycopy(cipherText, 0, combined, this.saltSizeBytes + iv.getIV().length, cipherText.length);
-        return combined;
+        cipher.init(cipherMode, key, iv);
+        return cipher.doFinal(input);
     }
 
-    public byte[] decrypt(byte[] input, EncryptionMode mode, String password) throws Exception {
-
-        final byte[] salt = (this.saltSizeBytes <= 0)? NO_SALT : Arrays.copyOfRange(input, 0, this.saltSizeBytes);
-        final byte[] iv = Arrays.copyOfRange(input, this.saltSizeBytes, this.saltSizeBytes + this.blockSizeBytes);
-        final byte[] cipherText = Arrays.copyOfRange(input, this.saltSizeBytes + this.blockSizeBytes, input.length);
-
-        final Key key = this.deriveKey(password, this.keySizeBits, this.algorithmName, salt);
-        final IvParameterSpec ivSpec = new IvParameterSpec(iv);
-
-        final String transformation = this.algorithmName + "/" + mode.getMode() + (input.length % this.blockSizeBytes == 0 ? "NoPadding" : "PKCS5Padding");
-        final Cipher cipher = Cipher.getInstance(transformation);
-        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
-
-        // TODO: DELETE
-        System.out.println("IV: " + byteToHex(cipher.getIV()));
-        System.out.println("Key: " + byteToHex(key.getEncoded()));
-
-        return cipher.doFinal(cipherText);
+    /**
+     * Derives a secret key using PBKDF2 with HMAC SHA-256.
+     *
+     * @param password           The password used for key derivation.
+     * @param secretKeyLengthBits The desired length of the secret key in bits.
+     * @return The derived secret key.
+     * @throws NoSuchAlgorithmException If no such algorithm exists.
+     * @throws InvalidKeySpecException  If the provided key specification is invalid.
+     */
+    private SecretKey deriveSecretKey(String password, int secretKeyLengthBits) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        final SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_DERIVATION_ALGORITHM);
+        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), FIXED_SALT, SECRET_KEY_DERIVATION_ALGORITHM_ITERATIONS, secretKeyLengthBits);
+        return factory.generateSecret(spec);
     }
 
-    private String byteToHex(byte[] bytes) {
-        final StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02X ", b));
-        }
-        return sb.toString();
+    /**
+     * Extracts a symmetric encryption key from a derived secret key.
+     *
+     * @param derivedKey The derived secret key containing both key and IV.
+     * @param keySizeBytes The size of the encryption key in bytes.
+     * @param algorithm The name of the encryption algorithm.
+     * @return The extracted encryption key.
+     */
+    private Key extractKey(SecretKey derivedKey, int keySizeBytes, String algorithm) {
+        byte[] keyBytes = new byte[keySizeBytes];
+        System.arraycopy(derivedKey.getEncoded(), 0, keyBytes, 0, keySizeBytes);
+        return new SecretKeySpec(keyBytes, algorithm);
     }
 
-    private Key deriveKey(String password, int keySize, String algorithm, byte[] salt) throws Exception {
-        final SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_DERIVATION_ALGORITHM);
-        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, KEY_DERIVATION_ALGORITHM_ITERATIONS, keySize);
-        final SecretKey tmp = factory.generateSecret(spec);
-        return new SecretKeySpec(tmp.getEncoded(), algorithm);
+    /**
+     * Extracts an initialization vector (IV) from a derived secret key.
+     *
+     * @param derivedKey    The derived secret key containing both key and IV.
+     * @param keySizeBytes  The size of the encryption key in bytes.
+     * @param blockSizeBytes The size of the encryption block in bytes.
+     * @return The extracted initialization vector (IV).
+     */
+    private IvParameterSpec extractIV(SecretKey derivedKey, int keySizeBytes, int blockSizeBytes) {
+        byte[] ivBytes = new byte[blockSizeBytes];
+        System.arraycopy(derivedKey.getEncoded(), keySizeBytes, ivBytes, 0, blockSizeBytes);
+        return new IvParameterSpec(ivBytes);
     }
 
-    private IvParameterSpec generateIV(int blockBytesSize) {
-        final byte[] iv = new byte[blockBytesSize];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
-    }
-
-    private byte[] generateSalt(int saltBytesSize) {
-       return (saltBytesSize <= 0)? NO_SALT : new byte[saltBytesSize];
+    /**
+     * Converts bytes to bits.
+     *
+     * @param bytes The number of bytes.
+     * @return The equivalent number of bits.
+     */
+    private int bytesToBits(int bytes) {
+        return bytes * Byte.SIZE;
     }
 }
