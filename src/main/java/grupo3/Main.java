@@ -2,6 +2,9 @@ package grupo3;
 
 import grupo3.arguments.Arguments;
 import grupo3.bmp.Bitmap;
+import grupo3.encryption.EncryptionMode;
+import grupo3.encryption.EncryptionOptions;
+import grupo3.encryption.FileEncryptor;
 import grupo3.exceptions.ProgramArgumentsException;
 import grupo3.steganography.LsbxSteganography;
 import grupo3.steganography.SteganographyMethod;
@@ -63,7 +66,7 @@ public class Main {
         System.out.println(" Done!");
     }
 
-    private static void extractMessage(Arguments arguments) throws IOException {
+    private static void extractMessage(Arguments arguments) throws IOException{
         System.out.format("Reading file \"%s\"...%n", arguments.carrierFile());
         Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
 
@@ -73,13 +76,14 @@ public class Main {
 
         if (arguments.encryptionOptions() == null) {
             message = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
+            Files.write(Paths.get(arguments.outputFile()+arguments.steganographyMethod().getFileExtension()), message);
         }
         else {
             message = arguments.steganographyMethod().extractMessage(bitmap.getData());
+            FileEncryptor.decryptFile(arguments.encryptionOptions(), message, arguments.outputFile() );
         }
 
         System.out.format("Saving result to \"%s%s\"...", arguments.outputFile(), arguments.steganographyMethod().getFileExtension());
-        Files.write(Paths.get(arguments.outputFile()+arguments.steganographyMethod().getFileExtension()), message);
         System.out.println(" Done!");
     }
 

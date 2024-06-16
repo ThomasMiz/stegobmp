@@ -7,6 +7,6 @@ abstract class AbstractAESEncryption extends EncryptionAlgorithm {
     private static final int SALT_SIZE_BYTES = 0;
 
     AbstractAESEncryption(int keySizeBits) {
-        super(ALGORITHM, keySizeBits, BLOCK_SIZE_BYTES, SALT_SIZE_BYTES);
+        super(ALGORITHM, keySizeBits, BLOCK_SIZE_BYTES);
     }
 }

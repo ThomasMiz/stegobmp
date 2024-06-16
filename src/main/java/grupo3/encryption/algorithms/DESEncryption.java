@@ -8,7 +8,7 @@ public class DESEncryption extends EncryptionAlgorithm {
     private static final int SALT_SIZE_BYTES = 0;
 
     private DESEncryption() {
-        super(ALGORITHM, KEY_SIZE_BITS, BLOCK_SIZE_BYTES, SALT_SIZE_BYTES);
+        super(ALGORITHM, KEY_SIZE_BITS, BLOCK_SIZE_BYTES);
     }
 
     private static final DESEncryption instance = new DESEncryption();

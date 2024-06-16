@@ -16,54 +16,47 @@ public abstract class EncryptionAlgorithm {
 
     private static final String KEY_DERIVATION_ALGORITHM = "PBKDF2WithHmacSHA256";
     private static final int KEY_DERIVATION_ALGORITHM_ITERATIONS = 10000;
-    private static final byte[] NO_SALT = new byte[] {0};
+    private static final int SALT_SIZE_BYTES = 8;
+    private static final byte[] FIXED_SALT = new byte[SALT_SIZE_BYTES];
 
     private final String algorithmName;
     private final int keySizeBits;
     private final int blockSizeBytes;
-    private final int saltSizeBytes;
 
-    EncryptionAlgorithm(String algorithmName, int keySizeBits, int blockSizeBytes, int saltSizeBytes) {
+    EncryptionAlgorithm(String algorithmName, int keySizeBits, int blockSizeBytes) {
         this.algorithmName = algorithmName;
         this.keySizeBits = keySizeBits;
         this.blockSizeBytes = blockSizeBytes;
-        this.saltSizeBytes = saltSizeBytes;
     }
 
     public byte[] encrypt(byte[] input, EncryptionMode mode, String password) throws Exception {
-        final byte[] salt = generateSalt(this.saltSizeBytes);
 
-        final Key key = this.deriveKey(password, this.keySizeBits, this.algorithmName, salt);
+        final KeyAndIv keyAndIv = this.deriveKeyAndIV(password, this.blockSizeBytes, this.keySizeBits, this.algorithmName);
         final String transformation = this.algorithmName + "/" + mode.getMode() + (input.length % this.blockSizeBytes == 0 ? "NoPadding" : "PKCS5Padding");
         final Cipher cipher = Cipher.getInstance(transformation);
 
-        final IvParameterSpec iv = this.generateIV(this.blockSizeBytes);
-        cipher.init(Cipher.ENCRYPT_MODE, key, iv);
+        cipher.init(Cipher.ENCRYPT_MODE, keyAndIv.key, keyAndIv.iv);
 
         final byte[] cipherText = cipher.doFinal(input);
-        final byte[] combined = new byte[this.saltSizeBytes + iv.getIV().length + cipherText.length];
-        System.arraycopy(salt, 0, combined, 0, this.saltSizeBytes);
-        System.arraycopy(iv.getIV(), 0, combined, this.saltSizeBytes, iv.getIV().length);
-        System.arraycopy(cipherText, 0, combined, this.saltSizeBytes + iv.getIV().length, cipherText.length);
+        final byte[] combined = new byte[keyAndIv.iv.getIV().length + cipherText.length];
+        System.arraycopy(keyAndIv.iv.getIV(), 0, combined, 0, keyAndIv.iv.getIV().length);
+        System.arraycopy(cipherText, 0, combined, keyAndIv.iv.getIV().length, cipherText.length);
         return combined;
     }
 
     public byte[] decrypt(byte[] input, EncryptionMode mode, String password) throws Exception {
 
-        final byte[] salt = (this.saltSizeBytes <= 0)? NO_SALT : Arrays.copyOfRange(input, 0, this.saltSizeBytes);
-        final byte[] iv = Arrays.copyOfRange(input, this.saltSizeBytes, this.saltSizeBytes + this.blockSizeBytes);
-        final byte[] cipherText = Arrays.copyOfRange(input, this.saltSizeBytes + this.blockSizeBytes, input.length);
+        final byte[] cipherText = Arrays.copyOfRange(input, 0, input.length);
 
-        final Key key = this.deriveKey(password, this.keySizeBits, this.algorithmName, salt);
-        final IvParameterSpec ivSpec = new IvParameterSpec(iv);
+        final KeyAndIv keyAndIv = this.deriveKeyAndIV(password, this.blockSizeBytes, this.keySizeBits, this.algorithmName);
 
-        final String transformation = this.algorithmName + "/" + mode.getMode() + (input.length % this.blockSizeBytes == 0 ? "NoPadding" : "PKCS5Padding");
+        final String transformation = this.algorithmName + "/" + mode.getMode() + "/NoPadding";
         final Cipher cipher = Cipher.getInstance(transformation);
-        cipher.init(Cipher.DECRYPT_MODE, key, ivSpec);
+        cipher.init(Cipher.DECRYPT_MODE, keyAndIv.key, keyAndIv.iv);
 
         // TODO: DELETE
         System.out.println("IV: " + byteToHex(cipher.getIV()));
-        System.out.println("Key: " + byteToHex(key.getEncoded()));
+        System.out.println("Key: " + byteToHex(keyAndIv.key.getEncoded()));
 
         return cipher.doFinal(cipherText);
     }
@@ -76,20 +69,19 @@ public abstract class EncryptionAlgorithm {
         return sb.toString();
     }
 
-    private Key deriveKey(String password, int keySize, String algorithm, byte[] salt) throws Exception {
+    private KeyAndIv deriveKeyAndIV(String password, int blockSizeBytes, int keySizeBits, String algorithm) throws Exception {
         final SecretKeyFactory factory = SecretKeyFactory.getInstance(KEY_DERIVATION_ALGORITHM);
-        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, KEY_DERIVATION_ALGORITHM_ITERATIONS, keySize);
+        final int bits = blockSizeBytes * 8 + keySizeBits;
+        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), FIXED_SALT, KEY_DERIVATION_ALGORITHM_ITERATIONS, bits);
         final SecretKey tmp = factory.generateSecret(spec);
-        return new SecretKeySpec(tmp.getEncoded(), algorithm);
+        byte[] iv = new byte[this.blockSizeBytes];
+        byte[] key = new byte[this.keySizeBits / 8];
+        System.arraycopy(tmp.getEncoded(), 0, key, 0, this.keySizeBits / 8);
+        System.arraycopy(tmp.getEncoded(), this.keySizeBits / 8, iv, 0, this.blockSizeBytes);
+        return new KeyAndIv(new SecretKeySpec(key, algorithm), new IvParameterSpec(iv));
     }
 
-    private IvParameterSpec generateIV(int blockBytesSize) {
-        final byte[] iv = new byte[blockBytesSize];
-        new SecureRandom().nextBytes(iv);
-        return new IvParameterSpec(iv);
-    }
+    private record KeyAndIv(Key key, IvParameterSpec iv) { }
 
-    private byte[] generateSalt(int saltBytesSize) {
-       return (saltBytesSize <= 0)? NO_SALT : new byte[saltBytesSize];
-    }
 }
+
