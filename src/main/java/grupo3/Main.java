@@ -4,8 +4,9 @@ import grupo3.arguments.Arguments;
 import grupo3.bmp.Bitmap;
 import grupo3.exceptions.EncryptionException;
 import grupo3.exceptions.ProgramArgumentsException;
-import grupo3.utils.SteganographyDataProcessor;
+import grupo3.steganography.SteganographyMethod;
 import grupo3.utils.FileUtils;
+import grupo3.utils.SteganographyDataProcessor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -106,8 +107,9 @@ public class Main {
             String fileExtension;
 
             if (arguments.encryptionOptions() == null) {
-                messageData = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
-                fileExtension = arguments.steganographyMethod().getFileExtension();
+                SteganographyMethod.ExtractResult result = arguments.steganographyMethod().extractMessageWithExtension(bitmap.getData());
+                messageData = result.message;
+                fileExtension = result.fileExtension;
             } else {
                 final byte[] encryptedMessage = arguments.steganographyMethod().extractMessage(bitmap.getData());
                 final byte[] decryptedBytes = arguments.encryptionOptions().decrypt(encryptedMessage);

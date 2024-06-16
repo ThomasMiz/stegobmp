@@ -7,6 +7,7 @@ import grupo3.utils.*;
  * A Steganography method that hides information in the N lowest significant bits of the carrier.
  */
 public class LsbxSteganography implements SteganographyMethod {
+
     /**
      * The amount of bits hidden per byte.
      */
@@ -72,7 +73,7 @@ public class LsbxSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-
+        // TODO
     }
 
     @Override
@@ -90,12 +91,8 @@ public class LsbxSteganography implements SteganographyMethod {
     }
 
     @Override
-    public byte[] extractMessageWithExtension(byte[] carrier) {
-        return new byte[0];
-    }
-
-    @Override
-    public String getFileExtension() {
-        return null;
+    public ExtractResult extractMessageWithExtension(byte[] carrier) {
+        // TODO
+        return new ExtractResult(new byte[0]);
     }
 }

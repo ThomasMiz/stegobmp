@@ -3,16 +3,7 @@ package grupo3.steganography;
 import grupo3.exceptions.CarrierNotLargeEnoughException;
 import grupo3.utils.*;
 
-import java.util.AbstractMap;
-import java.util.HashMap;
-
 public class LsbiSteganography implements SteganographyMethod {
-
-    private String fileExtension;
-
-    public LsbiSteganography() {
-
-    }
 
     @Override
     public int calculateCarrierSize(int messageSize) {
@@ -69,12 +60,11 @@ public class LsbiSteganography implements SteganographyMethod {
 
         // Make the flips when necessary
         for (int j = 0; j < patterCounter.length; j++) {
-            if (patterCounter[j].getAppearances() < patterCounter[j].getInversions()*2) {
+            if (patterCounter[j].getAppearances() < patterCounter[j].getInversions() * 2) {
                 carrier[j] |= 0b00000001;
                 // TODO, improve. If all the bytes need to be flipped, four iterations are made
                 flipPattern(carrier, j, i);
-            }
-            else {
+            } else {
                 carrier[j] &= (byte) 0b11111110;
             }
         }
@@ -116,12 +106,12 @@ public class LsbiSteganography implements SteganographyMethod {
     }
 
     @Override
-    public byte[] extractMessageWithExtension(byte[] carrier) {
+    public ExtractResult extractMessageWithExtension(byte[] carrier) {
         SkipByteArrayBitIterator bits = initializeBits(carrier);
         int messageLength = readMessageLength(bits);
         byte[] message = readMessage(bits, messageLength);
-        this.fileExtension = readFileExtension(bits);
-        return message;
+        String fileExtension = readFileExtension(bits);
+        return new ExtractResult(message, fileExtension);
     }
 
     private SkipByteArrayBitIterator initializeBits(byte[] carrier) {
@@ -167,11 +157,6 @@ public class LsbiSteganography implements SteganographyMethod {
         return new String(extensionBytes, 0, i);
     }
 
-    @Override
-    public String getFileExtension() {
-        return fileExtension;
-    }
-
     private int getNextIdxSkipRed(int idx) {
         return idx % 3 == 1 ? idx + 2 : idx + 1;
     }
@@ -180,13 +165,11 @@ public class LsbiSteganography implements SteganographyMethod {
         return (elem >> 1) & 0b00000011;
     }
 
-    private void flipPattern (byte[] carrier, int pattern, int lastIdx) {
-        for (int i=4 ; i < lastIdx ;) {
+    private void flipPattern(byte[] carrier, int pattern, int lastIdx) {
+        for (int i = 4; i < lastIdx; i = getNextIdxSkipRed(i)) {
             if (getPattern(carrier[i]) == pattern) {
                 carrier[i] = (byte) (carrier[i] ^ 0b00000001);
             }
-            i=getNextIdxSkipRed(i);
         }
     }
-
 }

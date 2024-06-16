@@ -37,8 +37,8 @@ public interface SteganographyMethod {
      * <p>
      * The operation is done in-place, modifying the carrier message, but the message is left intact.
      *
-     * @param carrier The carrier in which to hide the message.
-     * @param message The message to hide.
+     * @param carrier       The carrier in which to hide the message.
+     * @param message       The message to hide.
      * @param fileExtension The fileExtension to hide.
      * @throws grupo3.exceptions.CarrierNotLargeEnoughException
      */
@@ -58,12 +58,25 @@ public interface SteganographyMethod {
      * <p>
      * The carrier message is not modified.
      *
-     * @return A new array with the extracted message.
+     * @return A new array with the extracted message, and the file extension.
      */
-    byte[] extractMessageWithExtension(byte[] carrier);
+    ExtractResult extractMessageWithExtension(byte[] carrier);
 
     /**
-     * @return the file extension previously parsed by extractMessageWithExtension
+     * Represents a successful result of a steganography message extraction operation. Contains the extracted message
+     * and a file extension.
      */
-    String getFileExtension();
+    class ExtractResult {
+        public byte[] message;
+        public String fileExtension;
+
+        public ExtractResult(byte[] message, String fileExtension) {
+            this.message = message;
+            this.fileExtension = fileExtension;
+        }
+
+        public ExtractResult(byte[] message) {
+            this.message = message;
+        }
+    }
 }
