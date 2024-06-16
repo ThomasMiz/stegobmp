@@ -65,6 +65,7 @@ public class Main {
                 String fileExtension = FileUtils.getFileExtension(arguments.messageFile());
                 arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, fileExtension);
             } else {
+                // TODO: Encrypt data
                 arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
             }
 
