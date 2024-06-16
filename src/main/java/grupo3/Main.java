@@ -2,13 +2,13 @@ package grupo3;
 
 import grupo3.arguments.Arguments;
 import grupo3.bmp.Bitmap;
-import grupo3.encryption.EncryptionOptions;
 import grupo3.exceptions.EncryptionException;
 import grupo3.exceptions.ProgramArgumentsException;
 import grupo3.utils.SteganographyDataProcessor;
 import grupo3.utils.FileUtils;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -65,14 +65,31 @@ public class Main {
                 String fileExtension = FileUtils.getFileExtension(arguments.messageFile());
                 arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, fileExtension);
             } else {
-                // TODO: Encrypt data
-                arguments.steganographyMethod().hideMessage(bitmap.getData(), message);
+
+                // TODO: Modularize code with LsbiSteganography
+
+                byte[] extensionBytes = FileUtils.getFileExtension(arguments.messageFile()).getBytes();
+
+                // Create a new byte array for the combined message, extension, and null terminator
+                byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1 + 4];
+                ByteBuffer b = ByteBuffer.allocate(4);
+                b.putInt(message.length);
+                System.arraycopy(b.array(), 0, extendedMessage, 0, 4);
+                System.arraycopy(message, 0, extendedMessage, 4, message.length);
+                System.arraycopy(extensionBytes, 0, extendedMessage, 4 + message.length, extensionBytes.length);
+
+                // Add the null terminator at the end
+                extendedMessage[extendedMessage.length - 1] = 0;
+
+                byte[] encryptedMessage = arguments.encryptionOptions().encrypt(extendedMessage);
+
+                arguments.steganographyMethod().hideMessage(bitmap.getData(), encryptedMessage);
             }
 
             System.out.format("Saving result to \"%s\"...", arguments.outputFile());
             bitmap.writeToFile(arguments.outputFile());
             System.out.println(" Done!");
-        } catch (IOException | ProgramArgumentsException e) {
+        } catch (IOException | ProgramArgumentsException | EncryptionException e) {
             System.err.println("Error embedding message:");
             System.err.println(e.getMessage());
         }
