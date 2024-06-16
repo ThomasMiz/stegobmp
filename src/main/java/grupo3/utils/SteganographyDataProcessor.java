@@ -3,10 +3,10 @@ package grupo3.utils;
 import java.util.Arrays;
 
 /**
- * Utility class for extracting data from byte arrays knowing that
- * decrypted bytes contains a string with the following format: realSize || data || ”.extension\0”
+ * Utility class for extracting data from steganography byte array knowing that
+ * the format is: realSize || data || ”.extension\0”
  */
-public class DataUtils {
+public class SteganographyDataProcessor {
 
     private static final int REAL_SIZE_BYTES = 4;
 
@@ -16,11 +16,11 @@ public class DataUtils {
     private final String fileExtension;
 
     /**
-     * Constructor for initializing with decrypted bytes.
+     * Constructs a SteganographyDataProcessor with the given decrypted bytes.
      *
-     * @param decryptedBytes The decrypted byte array.
+     * @param decryptedBytes The decrypted bytes containing realSize, data, and file extension.
      */
-    public DataUtils(byte[] decryptedBytes) {
+    public SteganographyDataProcessor(byte[] decryptedBytes) {
         this.decryptedBytes = decryptedBytes;
         this.realSize = extractRealSize();
         this.data = extractData();
@@ -28,7 +28,7 @@ public class DataUtils {
     }
 
     /**
-     * Extracts the integer value representing the real size from the beginning of the decrypted bytes.
+     * Extracts the real size of the data from the decrypted bytes.
      *
      * @return The integer value of the real size extracted from the byte array.
      */

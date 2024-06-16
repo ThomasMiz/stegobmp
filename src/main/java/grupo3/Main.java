@@ -5,7 +5,7 @@ import grupo3.bmp.Bitmap;
 import grupo3.encryption.EncryptionOptions;
 import grupo3.exceptions.EncryptionException;
 import grupo3.exceptions.ProgramArgumentsException;
-import grupo3.utils.DataUtils;
+import grupo3.utils.SteganographyDataProcessor;
 import grupo3.utils.FileUtils;
 
 import java.io.IOException;
@@ -99,7 +99,7 @@ public class Main {
                     throw new EncryptionException("Error decrypting: " + e.getMessage());
                 }
 
-                final DataUtils dataUtils = new DataUtils(decryptedBytes);
+                final SteganographyDataProcessor dataUtils = new SteganographyDataProcessor(decryptedBytes);
                 byte[] data = dataUtils.getData();
                 String fileExtension = dataUtils.getFileExtension();
 
