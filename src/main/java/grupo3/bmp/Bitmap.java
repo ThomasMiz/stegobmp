@@ -103,6 +103,9 @@ public class Bitmap {
 
         byte[] data = new byte[infoHeader.width * infoHeader.height * 3];
 
+        StreamUtils.readIgnore(stream, fileHeader.offBits - BmpFileHeader.SIZE - BmpInfoHeader.SIZE);
+        fileHeader.offBits = BmpFileHeader.SIZE + BmpInfoHeader.SIZE;
+
         for (int i = 0; i < infoHeader.height; i++) {
             StreamUtils.readExact(stream, data, i * stride, stride);
             StreamUtils.readIgnore(stream, paddingSize);
