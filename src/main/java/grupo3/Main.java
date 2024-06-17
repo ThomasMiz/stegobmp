@@ -10,6 +10,7 @@ import grupo3.utils.SteganographyDataProcessor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -54,8 +55,10 @@ public class Main {
             Bitmap bitmap = Bitmap.readFromFile(arguments.carrierFile());
             System.out.format("\"%s\" has a width of %d and height of %d%n", arguments.carrierFile(), bitmap.getWidth(), bitmap.getHeight());
 
+            String fileExtension = FileUtils.getFileExtension(arguments.messageFile());
+
             int carrierSize = bitmap.getData().length;
-            int maxHiddenSize = arguments.steganographyMethod().calculateHiddenSize(carrierSize);
+            int maxHiddenSize = arguments.steganographyMethod().calculateHiddenSize(carrierSize, fileExtension);
             System.out.format("This means it can carry a message of up to %d bytes%n", maxHiddenSize);
 
             if (message.length > maxHiddenSize) {
@@ -63,13 +66,12 @@ public class Main {
                 return;
             }
             if (arguments.encryptionOptions() == null) {
-                String fileExtension = FileUtils.getFileExtension(arguments.messageFile());
                 arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, fileExtension);
             } else {
 
                 // TODO: Modularize code with LsbiSteganography
 
-                byte[] extensionBytes = FileUtils.getFileExtension(arguments.messageFile()).getBytes();
+                byte[] extensionBytes = fileExtension.getBytes(StandardCharsets.UTF_8);
 
                 // Create a new byte array for the combined message, extension, and null terminator
                 byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1 + 4];

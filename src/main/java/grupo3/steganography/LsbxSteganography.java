@@ -29,9 +29,14 @@ public class LsbxSteganography implements SteganographyMethod {
     }
 
     @Override
-    public int calculateCarrierSize(int messageSize) {
+    public int calculateCarrierSize(int messageSize, String fileExtension) {
         // Four extra bytes for storing the length of the message
         messageSize += 4;
+
+        // If there's a file extension in use, then count those bytes too, plus the '\0'
+        if (fileExtension != null) {
+            messageSize += fileExtension.getBytes(StandardCharsets.UTF_8).length + 1;
+        }
 
         // Calculate the total amount of bits the message has
         int messageSizeBits = messageSize * 8;
@@ -41,13 +46,18 @@ public class LsbxSteganography implements SteganographyMethod {
     }
 
     @Override
-    public int calculateHiddenSize(int carrierSize) {
+    public int calculateHiddenSize(int carrierSize, String fileName) {
         // A carrier of that size will have up to this amount of hidden bits, and therefore bytes
         int totalSizeBits = carrierSize * bitCount;
         int totalSizeBytes = totalSizeBits / 8;
 
         // Remove the first four bytes which are used to indicate the length of the message
         int messageSize = totalSizeBytes - 4;
+
+        // Remove the last few bytes used for the file extension, if one is present, plus the '\0'
+        if (fileName != null) {
+            messageSize -= fileName.getBytes(StandardCharsets.UTF_8).length + 1;
+        }
 
         // Make sure we didn't go below 0
         return Math.max(0, messageSize);
@@ -62,7 +72,7 @@ public class LsbxSteganography implements SteganographyMethod {
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
         byte[] fileExtensionBytes = fileExtension == null ? null : fileExtension.getBytes(StandardCharsets.UTF_8);
         int fileExtensionLengthBytes = fileExtensionBytes == null ? 0 : fileExtensionBytes.length;
-        if (carrier.length < calculateCarrierSize(message.length) + fileExtensionLengthBytes) {
+        if (carrier.length < calculateCarrierSize(message.length, fileExtension) + fileExtensionLengthBytes) {
             throw new CarrierNotLargeEnoughException();
         }
 

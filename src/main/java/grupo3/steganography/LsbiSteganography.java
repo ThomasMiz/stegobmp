@@ -3,12 +3,19 @@ package grupo3.steganography;
 import grupo3.exceptions.CarrierNotLargeEnoughException;
 import grupo3.utils.*;
 
+import java.nio.charset.StandardCharsets;
+
 public class LsbiSteganography implements SteganographyMethod {
 
     @Override
-    public int calculateCarrierSize(int messageSize) {
+    public int calculateCarrierSize(int messageSize, String fileExtension) {
         // Four extra bytes for storing the length of the message
         messageSize += 4;
+
+        // If there's a file extension in use, then count those bytes too, plus the '\0'
+        if (fileExtension != null) {
+            messageSize += fileExtension.getBytes(StandardCharsets.UTF_8).length + 1;
+        }
 
         // Calculate the total amount of bits the message has
         int messageSizeBits = messageSize * 8;
@@ -20,12 +27,17 @@ public class LsbiSteganography implements SteganographyMethod {
     }
 
     @Override
-    public int calculateHiddenSize(int carrierSize) {
+    public int calculateHiddenSize(int carrierSize, String fileName) {
         // A carrier of that size will have 2 bits every 3 bytes, since nothing is stored under the R byte.
         int totalSizeBits = carrierSize / 3 * 2;
 
         // Remove the first four bytes which are used to indicate the length of the message
         int messageSize = totalSizeBits - 4;
+
+        // Remove the last few bytes used for the file extension, if one is present, plus the '\0'
+        if (fileName != null) {
+            messageSize -= fileName.getBytes(StandardCharsets.UTF_8).length + 1;
+        }
 
         // Make sure we didn't go below 0
         return Math.max(0, messageSize);
@@ -72,7 +84,7 @@ public class LsbiSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessage(byte[] carrier, byte[] message) {
-        if (carrier.length < calculateCarrierSize(message.length)) {
+        if (carrier.length < calculateCarrierSize(message.length, null)) {
             throw new CarrierNotLargeEnoughException();
         }
 
@@ -81,7 +93,7 @@ public class LsbiSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-        byte[] extensionBytes = fileExtension.getBytes();
+        byte[] extensionBytes = fileExtension.getBytes(StandardCharsets.UTF_8);
 
         // Create a new byte array for the combined message, extension, and null terminator
         byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1];
@@ -91,7 +103,7 @@ public class LsbiSteganography implements SteganographyMethod {
         // Add the null terminator at the end
         extendedMessage[extendedMessage.length - 1] = 0;
 
-        if (carrier.length < calculateCarrierSize(extendedMessage.length)) {
+        if (carrier.length < calculateCarrierSize(extendedMessage.length, fileExtension)) {
             throw new CarrierNotLargeEnoughException();
         }
 

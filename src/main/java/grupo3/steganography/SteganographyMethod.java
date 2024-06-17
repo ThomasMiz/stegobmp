@@ -7,18 +7,20 @@ public interface SteganographyMethod {
     /**
      * Calculates the minimum size required for a carrier message to be capable of sending a hidden message.
      *
-     * @param messageSize The size in bytes of the hidden message.
+     * @param messageSize   The size in bytes of the hidden message.
+     * @param fileExtension The file extension to save, or null if not required.
      * @return The minimum size required for the carrier message.
      */
-    int calculateCarrierSize(int messageSize);
+    int calculateCarrierSize(int messageSize, String fileExtension);
 
     /**
      * Calculates the maximum size for a hidden message that can be carried by a carrier.
      *
-     * @param carrierSize The size in bytes of the carrier message.
+     * @param carrierSize   The size in bytes of the carrier message.
+     * @param fileExtension The file extension to save, or null if not required.
      * @return The maximum size for a hidden message.
      */
-    int calculateHiddenSize(int carrierSize);
+    int calculateHiddenSize(int carrierSize, String fileExtension);
 
     /**
      * Hides a message into a carrier message.

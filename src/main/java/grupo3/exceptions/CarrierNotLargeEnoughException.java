@@ -2,6 +2,7 @@ package grupo3.exceptions;
 
 public class CarrierNotLargeEnoughException extends RuntimeException {
     public CarrierNotLargeEnoughException() {
+        super("The carrier is not large enough for this message!");
     }
 
     public CarrierNotLargeEnoughException(String message) {
