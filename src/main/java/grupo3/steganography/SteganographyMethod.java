@@ -2,12 +2,16 @@ package grupo3.steganography;
 
 import grupo3.exceptions.CarrierNotLargeEnoughException;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**
  * An interface that defines a steganography method for hiding a message in a carrier.
  */
 public interface SteganographyMethod {
+
+    int MESSAGE_LENGTH_BYTES = 4;
+
     /**
      * Calculates the minimum size required for a carrier message to be capable of sending a hidden message.
      *
@@ -50,28 +54,49 @@ public interface SteganographyMethod {
      */
     void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension);
 
-    private byte[] createExtendedMessage(byte[] message, String fileExtension) {
+    private byte[] createExtendedMessage(byte[] message, String fileExtension, boolean includeLength) {
         byte[] extensionBytes = fileExtension == null ? new byte[0] : fileExtension.getBytes(StandardCharsets.UTF_8);
+        int messageLength = includeLength ? MESSAGE_LENGTH_BYTES : 0;
 
         // Create a new byte array for the combined message, extension, and null terminator
-        byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1];
-        System.arraycopy(message, 0, extendedMessage, 0, message.length);
-        System.arraycopy(extensionBytes, 0, extendedMessage, message.length, extensionBytes.length);
+        byte[] extendedMessage = new byte[message.length + extensionBytes.length + messageLength + 1];
+        int offset = 0;
+
+        if (includeLength) {
+            // Copy the length of the message
+            ByteBuffer b = ByteBuffer.allocate(MESSAGE_LENGTH_BYTES);
+            b.putInt(message.length);
+            System.arraycopy(b.array(), 0, extendedMessage, offset, MESSAGE_LENGTH_BYTES);
+            offset += MESSAGE_LENGTH_BYTES;
+        }
+
+        // Copy the message itself
+        System.arraycopy(message, 0, extendedMessage, offset, message.length);
+        offset += message.length;
+
+        // Copy the extension bytes
+        System.arraycopy(extensionBytes, 0, extendedMessage, offset, extensionBytes.length);
+        offset += extensionBytes.length;
 
         // Add the null terminator at the end
-        extendedMessage[extendedMessage.length - 1] = 0;
+        extendedMessage[offset] = 0;
 
         return extendedMessage;
     }
 
-    default byte[] getExtendedMessage(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
-        byte[] extendedMessage = createExtendedMessage(message, fileExtension);
-
-        if (carrier.length < calculateCarrierSize(message.length, fileExtension) + extendedMessage.length) {
+    private byte[] getExtendedMessage(byte[] carrier, byte[] message, String fileExtension, boolean includeLength) throws CarrierNotLargeEnoughException {
+        if (carrier.length < calculateCarrierSize(message.length, fileExtension)) {
             throw new CarrierNotLargeEnoughException();
         }
+        return createExtendedMessage(message, fileExtension, includeLength);
+    }
 
-        return extendedMessage;
+    default byte[] getExtendedMessageWithLength(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
+        return getExtendedMessage(carrier, message, fileExtension, true);
+    }
+
+    default byte[] getExtendedMessageWithoutLength(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
+        return getExtendedMessage(carrier, message, fileExtension, false);
     }
 
     /**

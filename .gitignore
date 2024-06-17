@@ -8,6 +8,7 @@ target/
 *.xml
 *.bmp
 *.pdf
+*.png
 
 # Do not ignore files in the src/bmp folder
 !src/bmp/
@@ -15,6 +16,7 @@ target/
 !src/bmp/*.xml
 !src/bmp/*.bmp
 !src/bmp/*.pdf
+!src/bmp/*.png
 
 
 ### IntelliJ IDEA ###

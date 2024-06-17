@@ -68,24 +68,8 @@ public class Main {
             if (arguments.encryptionOptions() == null) {
                 arguments.steganographyMethod().hideMessageWithExtension(bitmap.getData(), message, fileExtension);
             } else {
-
-                // TODO: Modularize code with LsbiSteganography
-
-                byte[] extensionBytes = fileExtension.getBytes(StandardCharsets.UTF_8);
-
-                // Create a new byte array for the combined message, extension, and null terminator
-                byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1 + 4];
-                ByteBuffer b = ByteBuffer.allocate(4);
-                b.putInt(message.length);
-                System.arraycopy(b.array(), 0, extendedMessage, 0, 4);
-                System.arraycopy(message, 0, extendedMessage, 4, message.length);
-                System.arraycopy(extensionBytes, 0, extendedMessage, 4 + message.length, extensionBytes.length);
-
-                // Add the null terminator at the end
-                extendedMessage[extendedMessage.length - 1] = 0;
-
+                byte[] extendedMessage = arguments.steganographyMethod().getExtendedMessageWithLength(bitmap.getData(), message, fileExtension);
                 byte[] encryptedMessage = arguments.encryptionOptions().encrypt(extendedMessage);
-
                 arguments.steganographyMethod().hideMessage(bitmap.getData(), encryptedMessage);
             }
 
