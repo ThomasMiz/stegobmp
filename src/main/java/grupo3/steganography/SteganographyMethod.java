@@ -54,6 +54,15 @@ public interface SteganographyMethod {
      */
     void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension);
 
+    /**
+     * Creates an extended message byte array by combining the original message,
+     * a file extension, and optionally the length of the message itself.
+     *
+     * @param message         The original message byte array to be extended.
+     * @param fileExtension   The file extension to append to the message, can be null.
+     * @param includeLength   Indicates whether to include the length of the message.
+     * @return A byte array representing the extended message.
+     */
     private byte[] createExtendedMessage(byte[] message, String fileExtension, boolean includeLength) {
         byte[] extensionBytes = fileExtension == null ? new byte[0] : fileExtension.getBytes(StandardCharsets.UTF_8);
         int messageLength = includeLength ? MESSAGE_LENGTH_BYTES : 0;
@@ -84,6 +93,18 @@ public interface SteganographyMethod {
         return extendedMessage;
     }
 
+    /**
+     * Retrieves an extended message byte array by embedding the original message
+     * into a carrier byte array, appending a file extension, and optionally including
+     * the length of the message.
+     *
+     * @param carrier         The byte array used as a carrier for the extended message.
+     * @param message         The original message byte array to be embedded.
+     * @param fileExtension   The file extension to append to the message, can be null.
+     * @param includeLength   Indicates whether to include the length of the message.
+     * @return A byte array representing the extended message embedded within the carrier.
+     * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
+     */
     private byte[] getExtendedMessage(byte[] carrier, byte[] message, String fileExtension, boolean includeLength) throws CarrierNotLargeEnoughException {
         if (carrier.length < calculateCarrierSize(message.length, fileExtension)) {
             throw new CarrierNotLargeEnoughException();
@@ -91,10 +112,32 @@ public interface SteganographyMethod {
         return createExtendedMessage(message, fileExtension, includeLength);
     }
 
+    /**
+     * Retrieves an extended message byte array by embedding the original message
+     * into a carrier byte array, appending a file extension, and including the length
+     * of the message.
+     *
+     * @param carrier         The byte array used as a carrier for the extended message.
+     * @param message         The original message byte array to be embedded.
+     * @param fileExtension   The file extension to append to the message, can be null.
+     * @return A byte array representing the extended message embedded within the carrier.
+     * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
+     */
     default byte[] getExtendedMessageWithLength(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
         return getExtendedMessage(carrier, message, fileExtension, true);
     }
 
+    /**
+     * Retrieves an extended message byte array by embedding the original message
+     * into a carrier byte array, appending a file extension, and excluding the length
+     * of the message.
+     *
+     * @param carrier         The byte array used as a carrier for the extended message.
+     * @param message         The original message byte array to be embedded.
+     * @param fileExtension   The file extension to append to the message, can be null.
+     * @return A byte array representing the extended message embedded within the carrier.
+     * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
+     */
     default byte[] getExtendedMessageWithoutLength(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
         return getExtendedMessage(carrier, message, fileExtension, false);
     }
