@@ -2,7 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-*.bmp
 
 ### IntelliJ IDEA ###
 
@@ -41,5 +40,3 @@ build/
 .DS_Store
 
 *.xml
-*.png
-*.txt
