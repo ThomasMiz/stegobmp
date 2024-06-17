@@ -76,7 +76,7 @@ public class LsbiSteganography implements SteganographyMethod {
             throw new CarrierNotLargeEnoughException();
         }
 
-        hideMessage(carrier, new ConcatBitIterator(new BigEndianIntBitIterator(message.length), new ByteArrayBigEndianBitIterator(message)));
+        hideMessage(carrier, new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(message)));
     }
 
     @Override
@@ -95,7 +95,7 @@ public class LsbiSteganography implements SteganographyMethod {
             throw new CarrierNotLargeEnoughException();
         }
 
-        hideMessage(carrier, new ConcatBitIterator(new BigEndianIntBitIterator(message.length), new ByteArrayBigEndianBitIterator(extendedMessage)));
+        hideMessage(carrier, new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(extendedMessage)));
     }
 
     @Override

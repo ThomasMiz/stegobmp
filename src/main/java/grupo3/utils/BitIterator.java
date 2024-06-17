@@ -44,4 +44,27 @@ public interface BitIterator {
 
         return (byte) result;
     }
+
+    default int nextByteBeOrMinusOne() {
+        int value = 0;
+        for (int i = 7; i >= 0; i--) {
+            int bit = nextBitOrMinusOne();
+            if (bit == -1) {
+                return -1;
+            }
+
+            value |= (bit << i);
+        }
+
+        return value;
+    }
+
+    default int nextByteBe() {
+        int result = nextByteBeOrMinusOne();
+        if (result == -1) {
+            throw new IllegalStateException("This BitIterator has reached its end");
+        }
+
+        return (byte) result;
+    }
 }

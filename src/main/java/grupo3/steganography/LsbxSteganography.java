@@ -3,6 +3,8 @@ package grupo3.steganography;
 import grupo3.exceptions.CarrierNotLargeEnoughException;
 import grupo3.utils.*;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * A Steganography method that hides information in the N lowest significant bits of the carrier.
  */
@@ -53,17 +55,28 @@ public class LsbxSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessage(byte[] carrier, byte[] message) {
-        if (carrier.length < calculateCarrierSize(message.length)) {
+        hideMessageWithExtension(carrier, message, null);
+    }
+
+    @Override
+    public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
+        byte[] fileExtensionBytes = fileExtension == null ? null : fileExtension.getBytes(StandardCharsets.UTF_8);
+        int fileExtensionLengthBytes = fileExtensionBytes == null ? 0 : fileExtensionBytes.length;
+        if (carrier.length < calculateCarrierSize(message.length) + fileExtensionLengthBytes) {
             throw new CarrierNotLargeEnoughException();
         }
 
         BitIterator bits = new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(message));
+        if (fileExtensionBytes != null) {
+            bits = new ConcatBitIterator(bits, new ByteArrayBitIterator(fileExtensionBytes));
+            bits = new ConcatBitIterator(bits, new ByteArrayBitIterator(new byte[]{0}));
+        }
 
         int i;
         byte carrierMask = (byte) (0b11111111 << bitCount);
         for (i = 0; i < carrier.length && bits.hasNextBit(); i++) {
-            int hiddenBits = bits.nextBit();
-            for (int b = 1; b < bitCount; b++) {
+            int hiddenBits = bits.nextBit() << (bitCount - 1);
+            for (int b = bitCount - 2; b >= 0; b--) {
                 hiddenBits |= bits.nextBitOrZero() << b;
             }
 
@@ -71,28 +84,43 @@ public class LsbxSteganography implements SteganographyMethod {
         }
     }
 
-    @Override
-    public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-        // TODO
+    private ExtractResult extract(byte[] carrier, boolean withExtension) {
+        BitIterator bits = new SkipBitIterator(new ByteArrayBitIterator(carrier), bitCount);
+
+        int b1 = Byte.toUnsignedInt((byte) bits.nextByteBe());
+        int b2 = Byte.toUnsignedInt((byte) bits.nextByteBe());
+        int b3 = Byte.toUnsignedInt((byte) bits.nextByteBe());
+        int b4 = Byte.toUnsignedInt((byte) bits.nextByteBe());
+        int messageLength = (b1 << 24) | (b2 << 16) | (b3 << 8) | b4;
+        if (messageLength <= 0) {
+            throw new IllegalArgumentException("Invalid file format: the length must be greater than 0 but was " + messageLength);
+        }
+
+        byte[] message = new byte[messageLength];
+        for (int i = 0; i < message.length; i++) {
+            message[i] = (byte) bits.nextByteBe();
+        }
+
+        String fileExtension = null;
+        if (withExtension) {
+            StringBuilder extension = new StringBuilder();
+            int b;
+            while ((b = Byte.toUnsignedInt((byte) bits.nextByteBe())) != 0) {
+                extension.append((char) b);
+            }
+            fileExtension = extension.toString();
+        }
+
+        return new ExtractResult(message, fileExtension);
     }
 
     @Override
     public byte[] extractMessage(byte[] carrier) {
-        BitIterator bits = new SkipBitIterator(new ByteArrayBitIterator(carrier), bitCount);
-
-        int messageLength = (bits.nextByte() << 24) | (bits.nextByte() << 16) | (bits.nextByte() << 8) | (bits.nextByte());
-        byte[] message = new byte[messageLength];
-
-        for (int i = 0; i < message.length; i++) {
-            message[i] = (byte) bits.nextByte();
-        }
-
-        return message;
+        return extract(carrier, false).message;
     }
 
     @Override
     public ExtractResult extractMessageWithExtension(byte[] carrier) {
-        // TODO
-        return new ExtractResult(new byte[0]);
+        return extract(carrier, true);
     }
 }

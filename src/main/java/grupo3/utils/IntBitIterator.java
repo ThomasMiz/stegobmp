@@ -1,19 +1,18 @@
 package grupo3.utils;
 
-/**
- * An implementation of BitIterator for iterating over the bits of an int.
- */
 public class IntBitIterator implements BitIterator {
     private final int value;
     private int bitIndex;
+    private final int byteIndex;
 
-    public IntBitIterator(int value, int bitIndex) {
+    public IntBitIterator(int value, int bitIndex, int byteIndex) {
         this.value = value;
         this.bitIndex = bitIndex;
+        this.byteIndex = byteIndex;
     }
 
     public IntBitIterator(int value) {
-        this(value, 0);
+        this(value, 0, 0);
     }
 
     @Override
@@ -27,7 +26,7 @@ public class IntBitIterator implements BitIterator {
             return -1;
         }
 
-        int result = (value >> bitIndex) & 0x01;
+        int result = (value >> (31 - bitIndex)) & 0x01;
         bitIndex += 1;
         return result;
     }

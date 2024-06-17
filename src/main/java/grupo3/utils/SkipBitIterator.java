@@ -42,15 +42,14 @@ public class SkipBitIterator implements BitIterator {
 
     @Override
     public int nextBitOrMinusOne() {
-        int result = inner.nextBitOrMinusOne();
-
-        counted++;
-        if (counted == count) {
-            counted = 0;
+        if (counted == 0) {
             for (int i = 0; i < skip; i++) {
                 inner.nextBitOrMinusOne();
             }
         }
+
+        int result = inner.nextBitOrMinusOne();
+        counted = (counted + 1) % count;
 
         return result;
     }
