@@ -43,7 +43,7 @@ public class LsbiSteganography implements SteganographyMethod {
         return Math.max(0, messageSize);
     }
 
-    private void hideMessage(byte[] carrier, BitIterator bits) {
+    private void hideMessageInCarrier(byte[] carrier, BitIterator bitIterator) {
         // Array with two integers to store the appearances of each pattern '11' '10' '01' '00'
         // and how many of them where flipped
         IntPair[] patterCounter = new IntPair[4];
@@ -56,8 +56,8 @@ public class LsbiSteganography implements SteganographyMethod {
         byte carrierMask = (byte) 0b11111110;
 
         // Count the appearance of each pattern and the needed inversions
-        while (i < carrier.length && bits.hasNextBit()) {
-            byte hiddenBit = bits.nextBit();
+        while (i < carrier.length && bitIterator.hasNextBit()) {
+            byte hiddenBit = bitIterator.nextBit();
             int pattern = getPattern(carrier[i]);
             patterCounter[pattern].incrementAppearances();
 
@@ -84,30 +84,14 @@ public class LsbiSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessage(byte[] carrier, byte[] message) {
-        if (carrier.length < calculateCarrierSize(message.length, null)) {
-            throw new CarrierNotLargeEnoughException();
-        }
-
-        hideMessage(carrier, new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(message)));
+        hideMessageWithExtension(carrier, message, null);
     }
 
     @Override
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-        byte[] extensionBytes = fileExtension.getBytes(StandardCharsets.UTF_8);
-
-        // Create a new byte array for the combined message, extension, and null terminator
-        byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1];
-        System.arraycopy(message, 0, extendedMessage, 0, message.length);
-        System.arraycopy(extensionBytes, 0, extendedMessage, message.length, extensionBytes.length);
-
-        // Add the null terminator at the end
-        extendedMessage[extendedMessage.length - 1] = 0;
-
-        if (carrier.length < calculateCarrierSize(extendedMessage.length, fileExtension)) {
-            throw new CarrierNotLargeEnoughException();
-        }
-
-        hideMessage(carrier, new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(extendedMessage)));
+        byte[] extendedMessage = getExtendedMessage(carrier, message, fileExtension);
+        final BitIterator bitIterator = new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(extendedMessage));
+        hideMessageInCarrier(carrier, bitIterator);
     }
 
     @Override

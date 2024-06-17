@@ -70,24 +70,15 @@ public class LsbxSteganography implements SteganographyMethod {
 
     @Override
     public void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension) {
-        byte[] fileExtensionBytes = fileExtension == null ? null : fileExtension.getBytes(StandardCharsets.UTF_8);
-        int fileExtensionLengthBytes = fileExtensionBytes == null ? 0 : fileExtensionBytes.length;
-        if (carrier.length < calculateCarrierSize(message.length, fileExtension) + fileExtensionLengthBytes) {
-            throw new CarrierNotLargeEnoughException();
-        }
-
-        BitIterator bits = new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(message));
-        if (fileExtensionBytes != null) {
-            bits = new ConcatBitIterator(bits, new ByteArrayBitIterator(fileExtensionBytes));
-            bits = new ConcatBitIterator(bits, new ByteArrayBitIterator(new byte[]{0}));
-        }
+        byte[] extendedMessage = getExtendedMessage(carrier, message, fileExtension);
+        final BitIterator bitIterator = new ConcatBitIterator(new IntBitIterator(message.length), new ByteArrayBitIterator(extendedMessage));
 
         int i;
         byte carrierMask = (byte) (0b11111111 << bitCount);
-        for (i = 0; i < carrier.length && bits.hasNextBit(); i++) {
-            int hiddenBits = bits.nextBit() << (bitCount - 1);
+        for (i = 0; i < carrier.length && bitIterator.hasNextBit(); i++) {
+            int hiddenBits = bitIterator.nextBit() << (bitCount - 1);
             for (int b = bitCount - 2; b >= 0; b--) {
-                hiddenBits |= bits.nextBitOrZero() << b;
+                hiddenBits |= bitIterator.nextBitOrZero() << b;
             }
 
             carrier[i] = (byte) ((carrier[i] & carrierMask) | hiddenBits);

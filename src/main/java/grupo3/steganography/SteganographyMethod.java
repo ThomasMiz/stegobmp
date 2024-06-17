@@ -1,5 +1,9 @@
 package grupo3.steganography;
 
+import grupo3.exceptions.CarrierNotLargeEnoughException;
+
+import java.nio.charset.StandardCharsets;
+
 /**
  * An interface that defines a steganography method for hiding a message in a carrier.
  */
@@ -45,6 +49,30 @@ public interface SteganographyMethod {
      * @throws grupo3.exceptions.CarrierNotLargeEnoughException
      */
     void hideMessageWithExtension(byte[] carrier, byte[] message, String fileExtension);
+
+    private byte[] createExtendedMessage(byte[] message, String fileExtension) {
+        byte[] extensionBytes = fileExtension == null ? new byte[0] : fileExtension.getBytes(StandardCharsets.UTF_8);
+
+        // Create a new byte array for the combined message, extension, and null terminator
+        byte[] extendedMessage = new byte[message.length + extensionBytes.length + 1];
+        System.arraycopy(message, 0, extendedMessage, 0, message.length);
+        System.arraycopy(extensionBytes, 0, extendedMessage, message.length, extensionBytes.length);
+
+        // Add the null terminator at the end
+        extendedMessage[extendedMessage.length - 1] = 0;
+
+        return extendedMessage;
+    }
+
+    default byte[] getExtendedMessage(byte[] carrier, byte[] message, String fileExtension) throws CarrierNotLargeEnoughException {
+        byte[] extendedMessage = createExtendedMessage(message, fileExtension);
+
+        if (carrier.length < calculateCarrierSize(message.length, fileExtension) + extendedMessage.length) {
+            throw new CarrierNotLargeEnoughException();
+        }
+
+        return extendedMessage;
+    }
 
     /**
      * Extracts a message from a carrier message.
