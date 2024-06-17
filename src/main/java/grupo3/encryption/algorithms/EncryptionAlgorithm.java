@@ -6,6 +6,7 @@ import javax.crypto.*;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.Key;
@@ -21,6 +22,7 @@ public abstract class EncryptionAlgorithm {
     private static final int SECRET_KEY_DERIVATION_ALGORITHM_ITERATIONS = 10000;
     private static final int SALT_SIZE_BYTES = 8;
     private static final byte[] FIXED_SALT = new byte[SALT_SIZE_BYTES];
+    private static final byte[] NO_SALT = new byte[] {0};
 
     private final String algorithmName;
     private final int keySizeBytes;
@@ -124,7 +126,8 @@ public abstract class EncryptionAlgorithm {
      */
     private SecretKey deriveSecretKey(String password, int secretKeyLengthBits) throws NoSuchAlgorithmException, InvalidKeySpecException {
         final SecretKeyFactory factory = SecretKeyFactory.getInstance(SECRET_KEY_DERIVATION_ALGORITHM);
-        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), FIXED_SALT, SECRET_KEY_DERIVATION_ALGORITHM_ITERATIONS, secretKeyLengthBits);
+        final byte[] salt = (SALT_SIZE_BYTES == 0)? NO_SALT : FIXED_SALT;
+        final PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt, SECRET_KEY_DERIVATION_ALGORITHM_ITERATIONS, secretKeyLengthBits);
         return factory.generateSecret(spec);
     }
 
