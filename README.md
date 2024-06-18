@@ -1,10 +1,6 @@
 
 [![Java CI with Maven](https://github.com/ThomasMiz/stegobmp/actions/workflows/build.yaml/badge.svg)](https://github.com/ThomasMiz/stegobmp/actions/workflows/build.yaml)
 
-<div>
-    <img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white">    
-</div>
-
 # StegoBMP
 
 StegoBMP is a program developed in Java for hiding and extracting files within [BMP](https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapfileheader?redirectedfrom=MSDN) images using various 
