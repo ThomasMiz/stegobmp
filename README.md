@@ -1,4 +1,5 @@
 [![Java CI with Maven](https://github.com/ThomasMiz/stegobmp/actions/workflows/build.yaml/badge.svg)](https://github.com/ThomasMiz/stegobmp/actions/workflows/build.yaml)
+<img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white">
 
 # StegoBMP
 
