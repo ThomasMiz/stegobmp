@@ -3,6 +3,7 @@ package grupo3;
 import grupo3.arguments.Arguments;
 import grupo3.bmp.Bitmap;
 import grupo3.exceptions.EncryptionException;
+import grupo3.exceptions.FileExtensionNotFoundException;
 import grupo3.exceptions.ProgramArgumentsException;
 import grupo3.steganography.SteganographyMethod;
 import grupo3.utils.FileUtils;
@@ -28,8 +29,7 @@ public class Main {
                     break;
             }
         } catch (Exception e) {
-            System.err.println("An unexpected error occurred during execution: ");
-            System.err.println(e.getMessage());
+            System.err.println("An unexpected error occurred during execution: " + e.getMessage());
         }
     }
 
@@ -74,9 +74,8 @@ public class Main {
             System.out.format("Saving result to \"%s\"...", arguments.outputFile());
             bitmap.writeToFile(arguments.outputFile());
             System.out.println(" Done!");
-        } catch (IOException | ProgramArgumentsException | EncryptionException e) {
-            System.err.println("Error embedding message:");
-            System.err.println(e.getMessage());
+        } catch (IOException | FileExtensionNotFoundException | EncryptionException e) {
+            System.err.println("Error embedding message: " + e.getMessage());
         }
     }
 

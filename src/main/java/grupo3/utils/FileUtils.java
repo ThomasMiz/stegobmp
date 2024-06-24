@@ -1,6 +1,6 @@
 package grupo3.utils;
 
-import grupo3.exceptions.ProgramArgumentsException;
+import grupo3.exceptions.FileExtensionNotFoundException;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -15,11 +15,11 @@ public class FileUtils {
      *
      * @param filename The name of the file from which to extract the extension.
      * @return The file extension, including the dot (e.g., ".txt").
-     * @throws ProgramArgumentsException If the filename is null, empty, or does not contain an extension.
+     * @throws FileExtensionNotFoundException If the filename is null, empty, or does not contain an extension.
      */
-    public static String getFileExtension(String filename) throws ProgramArgumentsException {
+    public static String getFileExtension(String filename) throws FileExtensionNotFoundException {
         if (filename == null || filename.isEmpty()) {
-            throw new ProgramArgumentsException("Output filename should not be empty");
+            throw new FileExtensionNotFoundException("Output filename should not be empty");
         }
 
         int dotIndex = filename.lastIndexOf('.');
@@ -30,7 +30,7 @@ public class FileUtils {
         }
 
         // No extension found
-        throw new ProgramArgumentsException("Output filename should have an extension");
+        throw new FileExtensionNotFoundException("Output filename should have an extension");
     }
 
     /**
