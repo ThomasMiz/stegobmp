@@ -23,17 +23,7 @@ public abstract class EncryptionAlgorithm {
     private static final int SALT_SIZE_BYTES = 8;
     private static final byte[] FIXED_SALT = new byte[SALT_SIZE_BYTES];
     private static final byte[] NO_SALT = new byte[]{0};
-    /**
-     * Converts a byte array to a hexadecimal string representation.
-     * This method is specifically designed for debugging purposes to display
-     * the hexadecimal values of the IV (Initialization Vector) and derived KEY.
-     *
-     * @param bytes The byte array to be converted.
-     * @return A string containing hexadecimal representation of the byte array.
-     */
 
-    // https://stackoverflow.com/questions/9655181/java-convert-a-byte-array-to-a-hex-string
-    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
     private final String algorithmName;
     private final int keySizeBytes;
     private final int blockSizeBytes;
@@ -49,16 +39,6 @@ public abstract class EncryptionAlgorithm {
         this.algorithmName = algorithmName;
         this.keySizeBytes = keySizeBytes;
         this.blockSizeBytes = blockSizeBytes;
-    }
-
-    public static String bytesToHex(byte[] bytes) {
-        byte[] hexChars = new byte[bytes.length * 2];
-        for (int j = 0; j < bytes.length; j++) {
-            int v = bytes[j] & 0xFF;
-            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
-            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
-        }
-        return new String(hexChars, StandardCharsets.UTF_8);
     }
 
     /**
@@ -187,5 +167,25 @@ public abstract class EncryptionAlgorithm {
      */
     private int bytesToBits(int bytes) {
         return bytes * Byte.SIZE;
+    }
+
+    /**
+     * https://stackoverflow.com/questions/9655181/java-convert-a-byte-array-to-a-hex-string
+     * Converts a byte array to a hexadecimal string representation.
+     * This method is specifically designed for debugging purposes to display
+     * the hexadecimal values of the IV (Initialization Vector) and derived KEY.
+     *
+     * @param bytes The byte array to be converted.
+     * @return A string containing hexadecimal representation of the byte array.
+     **/
+    private static final byte[] HEX_ARRAY = "0123456789ABCDEF".getBytes(StandardCharsets.US_ASCII);
+    private static String bytesToHex(byte[] bytes) {
+        byte[] hexChars = new byte[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = HEX_ARRAY[v >>> 4];
+            hexChars[j * 2 + 1] = HEX_ARRAY[v & 0x0F];
+        }
+        return new String(hexChars, StandardCharsets.UTF_8);
     }
 }
