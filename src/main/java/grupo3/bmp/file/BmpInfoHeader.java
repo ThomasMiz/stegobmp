@@ -90,23 +90,6 @@ public class BmpInfoHeader {
     }
 
     /**
-     * Writes this header to an output stream.
-     */
-    public void writeTo(OutputStream stream) throws IOException {
-        StreamUtils.writeInt(stream, size);
-        StreamUtils.writeInt(stream, width);
-        StreamUtils.writeInt(stream, height);
-        StreamUtils.writeShort(stream, planes);
-        StreamUtils.writeShort(stream, bitCount);
-        StreamUtils.writeInt(stream, compression);
-        StreamUtils.writeInt(stream, sizeImage);
-        StreamUtils.writeInt(stream, pixelsPerMeterX);
-        StreamUtils.writeInt(stream, pixelsPerMeterY);
-        StreamUtils.writeInt(stream, colorUsed);
-        StreamUtils.writeInt(stream, colorImportant);
-    }
-
-    /**
      * Creates an instance of this header by reading it from a stream.
      */
     public static BmpInfoHeader readFrom(InputStream stream) throws IOException {
@@ -122,5 +105,22 @@ public class BmpInfoHeader {
         int colorUsed = StreamUtils.readInt(stream);
         int colorImportant = StreamUtils.readInt(stream);
         return new BmpInfoHeader(size, width, height, planes, bitCount, compression, sizeImage, pixelsPerMeterX, pixelsPerMeterY, colorUsed, colorImportant);
+    }
+
+    /**
+     * Writes this header to an output stream.
+     */
+    public void writeTo(OutputStream stream) throws IOException {
+        StreamUtils.writeInt(stream, size);
+        StreamUtils.writeInt(stream, width);
+        StreamUtils.writeInt(stream, height);
+        StreamUtils.writeShort(stream, planes);
+        StreamUtils.writeShort(stream, bitCount);
+        StreamUtils.writeInt(stream, compression);
+        StreamUtils.writeInt(stream, sizeImage);
+        StreamUtils.writeInt(stream, pixelsPerMeterX);
+        StreamUtils.writeInt(stream, pixelsPerMeterY);
+        StreamUtils.writeInt(stream, colorUsed);
+        StreamUtils.writeInt(stream, colorImportant);
     }
 }

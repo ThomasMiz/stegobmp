@@ -58,9 +58,9 @@ public interface SteganographyMethod {
      * Creates an extended message byte array by combining the original message,
      * a file extension, and optionally the length of the message itself.
      *
-     * @param message         The original message byte array to be extended.
-     * @param fileExtension   The file extension to append to the message, can be null.
-     * @param includeLength   Indicates whether to include the length of the message.
+     * @param message       The original message byte array to be extended.
+     * @param fileExtension The file extension to append to the message, can be null.
+     * @param includeLength Indicates whether to include the length of the message.
      * @return A byte array representing the extended message.
      */
     private byte[] createExtendedMessage(byte[] message, String fileExtension, boolean includeLength) {
@@ -98,10 +98,10 @@ public interface SteganographyMethod {
      * into a carrier byte array, appending a file extension, and optionally including
      * the length of the message.
      *
-     * @param carrier         The byte array used as a carrier for the extended message.
-     * @param message         The original message byte array to be embedded.
-     * @param fileExtension   The file extension to append to the message, can be null.
-     * @param includeLength   Indicates whether to include the length of the message.
+     * @param carrier       The byte array used as a carrier for the extended message.
+     * @param message       The original message byte array to be embedded.
+     * @param fileExtension The file extension to append to the message, can be null.
+     * @param includeLength Indicates whether to include the length of the message.
      * @return A byte array representing the extended message embedded within the carrier.
      * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
      */
@@ -117,9 +117,9 @@ public interface SteganographyMethod {
      * into a carrier byte array, appending a file extension, and including the length
      * of the message.
      *
-     * @param carrier         The byte array used as a carrier for the extended message.
-     * @param message         The original message byte array to be embedded.
-     * @param fileExtension   The file extension to append to the message, can be null.
+     * @param carrier       The byte array used as a carrier for the extended message.
+     * @param message       The original message byte array to be embedded.
+     * @param fileExtension The file extension to append to the message, can be null.
      * @return A byte array representing the extended message embedded within the carrier.
      * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
      */
@@ -132,9 +132,9 @@ public interface SteganographyMethod {
      * into a carrier byte array, appending a file extension, and excluding the length
      * of the message.
      *
-     * @param carrier         The byte array used as a carrier for the extended message.
-     * @param message         The original message byte array to be embedded.
-     * @param fileExtension   The file extension to append to the message, can be null.
+     * @param carrier       The byte array used as a carrier for the extended message.
+     * @param message       The original message byte array to be embedded.
+     * @param fileExtension The file extension to append to the message, can be null.
      * @return A byte array representing the extended message embedded within the carrier.
      * @throws CarrierNotLargeEnoughException If the carrier byte array is not large enough to hold the extended message.
      */

@@ -4,10 +4,10 @@ package grupo3.utils;
  * An implementation of BitIterator for iterating over the bits of a byte array.
  */
 public class ByteArrayBitIterator implements BitIterator {
-    private int index;
-    private int bitIndex;
     private final int endIndex;
     private final byte[] data;
+    private int index;
+    private int bitIndex;
 
     public ByteArrayBitIterator(int index, int bitIndex, int endIndex, byte[] data) {
         this.index = index;

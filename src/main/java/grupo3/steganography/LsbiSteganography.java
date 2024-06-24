@@ -1,6 +1,5 @@
 package grupo3.steganography;
 
-import grupo3.exceptions.CarrierNotLargeEnoughException;
 import grupo3.utils.*;
 
 import java.nio.charset.StandardCharsets;

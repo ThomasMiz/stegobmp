@@ -2,10 +2,10 @@ package grupo3.utils;
 
 public class SkipByteArrayBitIterator implements BitIterator {
 
-    private int index;
     private final int endIndex;
     private final byte[] data;
     private final byte[] inversions;
+    private int index;
 
     public SkipByteArrayBitIterator(int index, int endIndex, byte[] data, byte[] inversions) {
         this.index = index;

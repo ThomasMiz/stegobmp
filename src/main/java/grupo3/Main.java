@@ -9,8 +9,6 @@ import grupo3.utils.FileUtils;
 import grupo3.utils.SteganographyDataProcessor;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;

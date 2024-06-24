@@ -32,54 +32,6 @@ public record Arguments(
 
     private static final Logger logger = Logger.getLogger(Arguments.class.getName());
 
-    /**
-     * Specifies whether the user requested to embed or extract a message.
-     */
-    @Override
-    public ArgumentRequest request() {
-        return request;
-    }
-
-    /**
-     * A path to the file that contains the carrier message.
-     */
-    @Override
-    public String carrierFile() {
-        return carrierFile;
-    }
-
-    /**
-     * A path to the file with the hidden message.
-     */
-    @Override
-    public String messageFile() {
-        return messageFile;
-    }
-
-    /**
-     * A path to the file where the result should be written.
-     */
-    @Override
-    public String outputFile() {
-        return outputFile;
-    }
-
-    /**
-     * The steganography algorithm to use.
-     */
-    @Override
-    public SteganographyMethod steganographyMethod() {
-        return steganographyMethod;
-    }
-
-    /**
-     * The (optional) encryption options. If null, then no encryption should be used.
-     */
-    @Override
-    public EncryptionOptions encryptionOptions() {
-        return encryptionOptions;
-    }
-
     public static Arguments parse(Iterator<String> args) throws ProgramArgumentsException {
         ArgumentRequest request = null;
         String carrierFile = null;
@@ -259,5 +211,53 @@ public record Arguments(
         }
 
         return new Arguments(request, carrierFile, messageFile, outputFile, steganographyMethod, encryptionOptions);
+    }
+
+    /**
+     * Specifies whether the user requested to embed or extract a message.
+     */
+    @Override
+    public ArgumentRequest request() {
+        return request;
+    }
+
+    /**
+     * A path to the file that contains the carrier message.
+     */
+    @Override
+    public String carrierFile() {
+        return carrierFile;
+    }
+
+    /**
+     * A path to the file with the hidden message.
+     */
+    @Override
+    public String messageFile() {
+        return messageFile;
+    }
+
+    /**
+     * A path to the file where the result should be written.
+     */
+    @Override
+    public String outputFile() {
+        return outputFile;
+    }
+
+    /**
+     * The steganography algorithm to use.
+     */
+    @Override
+    public SteganographyMethod steganographyMethod() {
+        return steganographyMethod;
+    }
+
+    /**
+     * The (optional) encryption options. If null, then no encryption should be used.
+     */
+    @Override
+    public EncryptionOptions encryptionOptions() {
+        return encryptionOptions;
     }
 }

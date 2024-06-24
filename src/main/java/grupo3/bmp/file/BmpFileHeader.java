@@ -52,17 +52,6 @@ public class BmpFileHeader {
     }
 
     /**
-     * Writes this header to an output stream.
-     */
-    public void writeTo(OutputStream stream) throws IOException {
-        StreamUtils.writeShort(stream, type);
-        StreamUtils.writeInt(stream, size);
-        StreamUtils.writeShort(stream, reserved1);
-        StreamUtils.writeShort(stream, reserved2);
-        StreamUtils.writeInt(stream, offBits);
-    }
-
-    /**
      * Creates an instance of this header by reading it from a stream.
      */
     public static BmpFileHeader readFrom(InputStream stream) throws IOException {
@@ -72,5 +61,16 @@ public class BmpFileHeader {
         short reserved2 = StreamUtils.readShort(stream);
         int offBits = StreamUtils.readInt(stream);
         return new BmpFileHeader(type, size, reserved1, reserved2, offBits);
+    }
+
+    /**
+     * Writes this header to an output stream.
+     */
+    public void writeTo(OutputStream stream) throws IOException {
+        StreamUtils.writeShort(stream, type);
+        StreamUtils.writeInt(stream, size);
+        StreamUtils.writeShort(stream, reserved1);
+        StreamUtils.writeShort(stream, reserved2);
+        StreamUtils.writeInt(stream, offBits);
     }
 }

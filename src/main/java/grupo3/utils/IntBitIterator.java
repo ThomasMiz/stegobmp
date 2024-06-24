@@ -2,8 +2,8 @@ package grupo3.utils;
 
 public class IntBitIterator implements BitIterator {
     private final int value;
-    private int bitIndex;
     private final int byteIndex;
+    private int bitIndex;
 
     public IntBitIterator(int value, int bitIndex, int byteIndex) {
         this.value = value;
