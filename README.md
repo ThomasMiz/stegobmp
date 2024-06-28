@@ -33,31 +33,37 @@ BMP images are chosen due to their simple structure and wide usage.
 
 ## [Usage](#usage)
 
-### [Embedding a File](#embedding-a-file)
+Compile the project
+```sh 
+mvn clean install
+```
 
-To embed a file in a BMP image, use the following arguments or flags in the `Main.java`:
+### [Embedding a File](#embedding-a-file)
+> **Note:** The following commands will be executed in the root of the project
+
+To embed a file in a BMP image, use the following arguments or flags:
 ```sh
 # [] are optional parameters
--embed -in <file_to_hide> -p <carrier_bmp> -out <output_bmp> -steg <LSB1|LSB4|LSBI> [-a <aes128|aes192|aes256|des>] [-m <ecb|cfb|ofb|cbc>] [-pass <password>]
+java -jar ./target/stegobmp-1.0-SNAPSHOT.jar -embed -in <file_to_hide> -p <carrier_bmp> -out <output_bmp> -steg <LSB1|LSB4|LSBI> [-a <aes128|aes192|aes256|des>] [-m <ecb|cfb|ofb|cbc>] [-pass <password>]
 ```
 
 For example:
 ```sh
 # Embed secret.txt in image.bmp using LSB Improved steganography and DES encryption in CBC mode with the password "hidden"
--embed -in "secret.txt" -p "image.bmp" -out "output.bmp" -steg LSBI -a des -m cbc -pass "hidden"
+java -jar ./target/stegobmp-1.0-SNAPSHOT.jar -embed -in "secret.txt" -p "image.bmp" -out "output.bmp" -steg LSBI -a des -m cbc -pass "hidden"
 ```
 
 ### [Extracting a File](#extracting-a-file)
 To extract a hidden file from a BMP image, use the following arguments or flags in the `Main.java`:
 ```sh
 # [] are optional parameters
--extract -p <carrier_bmp> -out <output_file> -steg <LSB1|LSB4|LSBI> [-a <aes128|aes192|aes256|des>] [-m <ecb|cfb|ofb|cbc>] [-pass <password>]
+java -jar ./target/stegobmp-1.0-SNAPSHOT.jar -extract -p <carrier_bmp> -out <output_file> -steg <LSB1|LSB4|LSBI> [-a <aes128|aes192|aes256|des>] [-m <ecb|cfb|ofb|cbc>] [-pass <password>]
 ```
 
 For example:
 ```sh
 # Extract secret.txt from output.bmp which was hidden using LSB Improved steganography and DES encryption in CBC mode with the password "hidden"
--extract -p "output.bmp" -out "secret.txt" -steg LSBI -a des -m cbc -pass "hidden"
+java -jar ./target/stegobmp-1.0-SNAPSHOT.jar -extract -p "output.bmp" -out "secret.txt" -steg LSBI -a des -m cbc -pass "hidden"
 ```
 
 ## [Steganography algorithms](#steganography-algorithms)
